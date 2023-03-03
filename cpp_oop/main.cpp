@@ -1,32 +1,60 @@
+﻿//!
+//! ===== 基本概念 =====
+//! 面向对象的基本概念:
+//!     1、封装 : 将数据与操作封装在类内，对外只暴露最小接口
+//!     2、继承 : 子类继承父类多有的数据与操作，实现代码复用
+//!     3、多态 : 由父类定义接口，子类重新实现具体操作，可以利用父类指针指向子类操作
 //!
-//! 棋手:
+//!     在面向对象中，最关键的点就在于多态的使用，使用多态的好处可以通过接口简化具体操作，
+//!         由父类定义抽象接口实现具体的任务流，通过子类重新实现时可以做到在固定流程程中，
+//!         具体实现的重定义
+//!     封装是将数据结构与具体操作私有化，不让外部随便调用，放入任务出结果，实现模块化，
+//!         继承则只是简单的复制父类的所有内容，这两个特性并不神奇，不过仍然需要妥善处理，
+//!         不然返回会出现需要反复利用的代码被隐藏，冗余的数据被子类大量继承这种奇怪的场景。
+//!     掌握理论知识之后，接下来进入实际的编程环节。
+//! ===== 基本概念 =====
+//!
+//!
+//!
+//! ===== 任务介绍 =====
+//! 使用面向对象的方式写一个五子棋游戏:
+//!     场景描述:
+//!         一般的五子棋都为两个选手对着一个棋盘下棋，一个裁判判断胜利谁会胜出。
+//!             总结为:两个人下棋，一个裁判，一个棋盘，一个规则，谁会胜出？
+//!     高级抽象:
+//!         棋手类、裁判类、棋盘类、规则类、棋子类
+//! ===== 任务介绍 =====
+//!
+//!
+//!
+//! ===== 具体规划 =====
+//! 棋手:在棋盘下落子，会有先后手
 //!     抽象棋手:
 //!         行为[设置先手权、下棋、掀棋盘、获取棋盘规则、获取胜利通知]
 //!         属性[落子权、累计落子]
 //!     五子棋手:
 //!         行为[庆祝语]
 //!
-//! 裁判:
+//! 裁判:负责规划整个游戏流程，设置骑手先后手，
 //!     行为[设置棋手、设置棋盘、设置棋局规则、判定先手权、判定获胜、开始游戏]
 //!
-//! 棋盘:
+//! 棋盘:显示棋盘，棋手在棋盘上落子的信息展示与记录
 //!     抽向棋盘:
 //!         行为[允许落子]
 //!         属性[累计回合]
 //!     五子棋盘:
 //!         属性[五子棋盘]
 //!
-//!规则:
+//! 规则:判断落子之后是否胜利
 //!     抽象规则:
 //!         行为[获取棋盘、获取棋盘落点、是否获胜、规则描述]
 //!     五子规则:
 //!         行为[五子棋胜利判定规则]
 //!
+//! 棋子:在棋盘上的标记
+//!     属性[坐标、先手]
+//! ===== 具体规划 =====
 //!
-//!
-//! 两个人下棋，一个裁判，一个棋盘，一个规则，谁会胜出？
-//!
-
 #include <cstdint>
 #include <iostream>
 #include <sstream>
@@ -68,7 +96,7 @@ public:
     bool get_quit(){ return _quit; };
 
 protected:
-    bool _quit = false;
+    bool _quit = false; //掀棋盘
 };
 
 //== 键盘输入 ==
@@ -81,7 +109,7 @@ public:
         while(true)
         {
             cin>>str;
-            if(str == "quit") { _quit = true; return pos; }
+            if(str == "quit") { _quit = true; return pos; } //掀棋盘操作
             if(parse_pos(str,pos)) { return pos; }
         }
     }
@@ -112,16 +140,16 @@ private:
 class abs_player
 {
 public:
-    void set_input(abs_input *input) { _input = input; };      //设置输入方式
-    void set_first(bool first) { _first = first; };           //设置先手
-    void set_victory(bool victory) { _victory = victory; };   //设置胜利
-    bool get_is_first() { return _first; };                   //查看是否为先手
-    bool get_is_quit() { return _input->get_quit(); };         //掀棋盘
-    void set_name(const string &name) { _name = name; }
-    string get_name() { return _name; }
+    void set_input(abs_input *input) { _input = input; };       //设置输入方式
+    void set_first(bool first) { _first = first; };             //设置先手
+    void set_victory(bool victory) { _victory = victory; };     //设置胜利
+    bool get_is_first() { return _first; };                     //查看是否为先手
+    bool get_is_quit() { return _input->get_quit(); };          //掀棋盘
+    void set_name(const string &name) { _name = name; }         //设置选手名称
+    string get_name() { return _name; }                         //获取选手名称
 
     virtual ct_point down_piece() = 0;  //落子
-    virtual void down_succeed() = 0;    //落子成功
+    virtual void down_succeed() = 0;    //落子成功反馈
     virtual void show_victory() = 0;    //胜利通知
 
 protected:
@@ -185,7 +213,7 @@ protected:
     public:
         ct_point begin;
         ct_point end;
-        bool has_range(ct_point pos)
+        bool has_range(ct_point pos) //判断落点是否在棋盘上
         {
             if(pos.x >= end.x || pos.y >= end.y ||
                     pos.x < begin.x || pos.y < begin.y) return false;
@@ -200,12 +228,15 @@ public:
         _range.end.x = x; _range.end.y = y;
     }
     bool range(abs_chess chess) { return _range.has_range(chess._pos); };
+    void show_history() //游戏结束时显示记录
+    { for(const auto &a : _history) { cout<<a.x<<"|"<<a.y<<endl; } }
 
     virtual void show_chessboard() = 0; //显示棋盘
     virtual bool down_piece(abs_chess chess) = 0; //棋盘落子
 
 protected:
     ct_range _range;
+    vector<ct_point> _history;
 };
 
 //== 五子棋盘 ==
@@ -215,7 +246,13 @@ public:
     five_chessboard(uint32_t x,uint32_t y) : abs_chessboard(x,y)
     { init_board(x,y); }
 
-    //显示棋盘
+    //在显示棋盘内容上，本打算在创建一个抽象显示类，
+    //      可惜实在是想不出怎么样处理各种不同游戏不同类型的数据结构容器，不懂该怎么去定义接口，
+    //      因为本人对面向对象编程方式的理解并不深入，而是一个模板爱好者，
+    //      如果使用模板则可以轻松解决这个问题，但这一份代码就是为了学习面向对象的处理方式，万不可引用模板
+    //      所以除非想到更好的用多态的方式解决，否则就让代码更死板一点吧
+    //
+    //显示棋盘内容 :
     void show_chessboard() override
     {
         for(uint32_t y=0;y<_board.size();y++)
@@ -244,6 +281,7 @@ public:
             {
                 ch->_pos.x = chess._pos.x; ch->_pos.y = chess._pos.y;
                 ch->_exist = true; ch->_black = chess._first;
+                _history.push_back(chess._pos);
                 return true;
             }
         }
@@ -272,7 +310,7 @@ public:
 private:
     vector<vector<five_chess>> _board;
 
-    //初始化棋盘
+    //初始化棋盘大小
     void init_board(uint32_t x,uint32_t y)
     {
         for(uint32_t i=0;i<x;i++)
@@ -301,8 +339,7 @@ public:
 class five_rule : public abs_rule
 {
 public:
-    void set_chessboard(five_chessboard *board) { _board = board; }
-
+    //判断胜利标记
     bool has_victory(abs_chess pos) override
     {
         uint32_t hori = 1;//东+西
@@ -322,9 +359,12 @@ public:
         if(hori >= 5 || vert >= 5 || right_up >= 5 || left_down >= 5) return true;
         else return false;
     }
+    void set_chessboard(five_chessboard *board) { _board = board; }
 
 private:
     five_chessboard *_board = nullptr;
+
+    //递归统计一个方向内相同颜色的棋子
     uint32_t count_chess(abs_chess pos,ct_dire dire)
     {
         pos.add_point(dire);
@@ -349,7 +389,7 @@ class abs_praetor
 public:
     abs_praetor() { srand((uint32_t)time(NULL)); }
 
-    //游戏流程
+    //游戏流程（需要两个玩家，一个棋盘，一个游戏规则）
     virtual void start_play(abs_player *p1,abs_player *p2,
         abs_chessboard *board,abs_rule *rule) = 0;
 
@@ -364,7 +404,7 @@ public:
     void start_play(abs_player *p1,abs_player *p2,
         abs_chessboard *board,abs_rule *rule) override
     {
-        bool victory_first = false; //胜利方（先手或者后手方）
+        bool victory_first = false; //胜利方标记（先手或者后手方）
         if((rand() % 2) == 0) { p1->set_first(_first); p2->set_first(!_first); }
         else { p2->set_first(_first); p1->set_first(!_first); }
 
@@ -384,16 +424,16 @@ public:
             else down_player = p2;
 
             //如果选手掀棋盘，对方胜利
-            abs_chess pos = down_player->down_piece();//选手落子
+            abs_chess pos = down_player->down_piece(); //选手落子
             pos._first = down_player->get_is_first();
-            if(down_player->get_is_quit())
+            if(down_player->get_is_quit()) //掀棋盘处理
             { victory_first = !down_player->get_is_first(); break; }
 
             //查看棋盘是否允许落子，不允许则重新落子
             if(board->down_piece(pos))
             {
                 board->show_chessboard();
-                down_player->down_succeed(); _first = !_first;
+                down_player->down_succeed(); _first = !_first; //落子状态取非，下回合到对手
 
                 //规则胜利
                 if(rule->has_victory(pos))
@@ -401,6 +441,11 @@ public:
             }
             else cout<<"Invalid input"<<endl;
         }
+
+        //显示历史
+        cout<<"===== history ====="<<endl;
+        board->show_history();
+        cout<<"----- history -----"<<endl;
 
         //胜利反馈
         if(p1->get_is_first() == victory_first) p1->show_victory();
@@ -420,7 +465,6 @@ int main()
     //Windows控制台: UTF-8编码
     SetConsoleOutputCP(65001);
 #endif
-
 
     cout<<"===== 中文测试 ====="<<endl;
     cout<<"===== begin ====="<<endl;
@@ -444,7 +488,7 @@ int main()
 
     //设置规则
     five_rule rule;
-    rule.set_chessboard(&board);
+    rule.set_chessboard(&board); //获取棋盘的旗子容器
 
     //生成裁判，游戏开始
     five_praetor praetor;
