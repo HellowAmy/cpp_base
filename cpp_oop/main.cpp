@@ -409,6 +409,14 @@ public:
 };
 //===== 裁判 =====
 
+
+//===== 开始游戏 =====
+void start_game(abs_praetor *prateor,
+                abs_player *p1,abs_player *p2,
+                abs_chessboard *board,abs_rule *rule)
+{ prateor->start_play(p1,p2,board,rule); }
+//===== 开始游戏 =====
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -446,9 +454,11 @@ int main()
     five_rule rule;
     rule.set_chessboard(&board);
 
-    //生成裁判，游戏开始
+    //生成裁判
     five_praetor praetor;
-    praetor.start_play(&p1,&p2,&board,&rule);
+
+    //游戏开始
+    start_game(&praetor,&p1,&p2,&board,&rule);
     cout<<"===== end ====="<<endl;
 
     return 0;
