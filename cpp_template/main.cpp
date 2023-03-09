@@ -1,4 +1,4 @@
-
+﻿
 //!
 //! 象棋对战，双人对战，先后手，棋手，棋子，棋盘，棋子位置镜像转换
 //! 落子，棋子位置矫正，是否可以落子，重置棋盘，
@@ -6,6 +6,13 @@
 //! 输入点位，矫正点位，判断类型，跟随操作
 //! 初始化附带类型，点位附带类型，容器附带点位
 //! 行棋：落子在棋盘内，符合棋子规则，棋子无阻碍（吃子：落子有敌人）
+//!
+//! 》输入指令（固定的命令）
+//!     》识别选中棋子与行动（分析棋子点位与行动方向）
+//!         》让棋子是识别行动具体（棋子根据棋子方向分析出两个坐标）
+//!             》根据坐标分析行动类型（移动或者吃子）
+//!                 》验证行动的可行性（根据棋盘与棋子类型验证这坐标可行性）
+//!                     》执行动作（回到主流程执行结果）
 //!
 //! 操作：
 //! 将 士 象 马 车 炮 兵   进 退 平   上 下
@@ -46,6 +53,12 @@ struct ct_point
 {
     uint32_t x;
     uint32_t y;
+    template<class Tpos1>
+    ct_point &operator=(ct_point& pos)
+    { this->x = pos.x; this->y = pos.y; return *this; }
+
+    ct_point &operator+(ct_point& pos)
+    { this->x += pos.x; this->y += pos.y; return *this; }
 };
 
 //== 方向位 ==
@@ -69,9 +82,9 @@ ostream& operator<<(ostream& out, const ct_chess& chess)
 { return out<<"{"<<chess._type<<"|"<<chess._name<<"["<<chess._first <<"]} "; }
 
 //== 点位运算 ==
-template<class Tpos>
-ct_dire operator-(const Tpos& pos1, const Tpos& pos2)
-{ ct_dire pos; pos.x = pos1.x - pos2.x; pos.y = pos1.y - pos2.y; return pos; }
+template<class Tpos,class Tret>
+Tret operator-(const Tpos& pos1, const Tpos& pos2)
+{ Tret pos; pos.x = pos1.x - pos2.x; pos.y = pos1.y - pos2.y; return pos; }
 
 template<class Tpos1,class Tpos2>
 ct_dire operator-(const Tpos1& pos1, const Tpos2& pos2)
@@ -102,6 +115,12 @@ public:
         }
     }
     void set_board(const Tboard &board) { _board = board; }
+
+    bool input_pos()
+    {
+        return false;
+    }
+
 
 private:
     Tboard _board;
@@ -293,19 +312,16 @@ private:
     bool _first;
 };
 
+template<class Tboard>
+bool equal_first(ct_point from,ct_point to,Tboard board)
+{ return board[to.x][to.y]._first == board[from.x][from.y]._first; }
+
 //===== 行动规则 =====
 //将
+template<class Tboard>
 class Tjiang
 {
 public:
-    /*
-    5
-    4     -------
-    3     |     |
-    2     |     |
-    1 2 3 |4 5 6| 7 8 9
-          '''''''
-    */
     bool action(ct_point from,ct_point to)
     {
         bool ok1 = false; //限制1:落子点在宫内
@@ -317,22 +333,23 @@ public:
         if(dire.x - dire.y == -1 || dire.x - dire.y == 1) ok3 = true;
         return ok1 && ok2 && ok3;
     }
-    string type_name(bool first)
-    { if(first) return "[将]"; else return "(将)"; }
+    bool move(ct_point from,ct_point to)
+    {
+        if(equal_first(from,to,_board)) return false;
+        return action(from,to);
+    }
+    bool attack(ct_point from,ct_point to)
+    { return move(from,to); }
+
+    Tjiang(Tboard board) : _board(board){}
+    Tboard _board;
 };
 
 //士
+template<class Tboard>
 class Tshi
 {
 public:
-    /*
-    5
-    4     -------
-    3     |     |
-    2     |     |
-    1 2 3 |4 5 6| 7 8 9
-          '''''''
-    */
     bool action(ct_point from,ct_point to)
     {
         bool ok1 = false; //限制1:落子点在宫内
@@ -344,23 +361,23 @@ public:
         if(vabs(dire.x) == 1 && vabs(dire.y) == 1) ok3 = true;
         return ok1 && ok2 && ok3;
     }
-    string type_name(bool first)
-    { if(first) return "[士]"; else return "(士)"; }
+    bool move(ct_point from,ct_point to)
+    {
+        if(equal_first(from,to,_board)) return false;
+        return action(from,to);
+    }
+    bool attack(ct_point from,ct_point to)
+    { return move(from,to); }
+
+    Tshi(Tboard board) : _board(board){}
+    Tboard _board;
 };
 
 //象
+template<class Tboard>
 class Txiang
 {
 public:
-    /*
-    |------------------
-    |5                |
-    |4                |
-    |3                |
-    |2                |
-    |1 2 3 4 5 6 7 8 9|
-     '''''''''''''''''
-    */
     bool action(ct_point from,ct_point to)
     {
         bool ok1 = false; //限制1:落子在河内
@@ -370,11 +387,26 @@ public:
         if(vabs(dire.x) == 2 && vabs(dire.y) == 2) ok2 = true;
         return ok1 && ok2;
     }
-    string type_name(bool first)
-    { if(first) return "[象]"; else return "(象)"; }
+    bool move(ct_point from,ct_point to)
+    {
+        if(equal_first(from,to,_board)) return false;
+        if(action(from,to)) //卡象眼
+        {
+            ct_point tm;
+            tm.x = (to.x - from.x)/2; tm.y = (to.y - from.y)/2;
+            if(_board[from.x + to.x][from.y + to.y]._type == "") return true;
+        }
+        return false;
+    }
+    bool attack(ct_point from,ct_point to)
+    { return move(from,to); }
+
+    Txiang(Tboard board) : _board(board){}
+    Tboard _board;
 };
 
 //马
+template<class Tboard>
 class Tma
 {
 public:
@@ -386,8 +418,22 @@ public:
                 || (vabs(dire.x) == 1 && vabs(dire.y) == 2)) ok1 = true;
         return ok1;
     }
-    string type_name(bool first)
-    { if(first) return "[马]"; else return "(马)"; }
+    bool move(ct_point from,ct_point to)
+    {
+        if(equal_first(from,to,_board)) return false;
+        if(action(from,to)) //别马脚
+        {
+            ct_point tm;
+            tm.x = (to.x - from.x)/2; tm.y = (to.y - from.y)/2;
+            if(_board[from.x + to.x][from.y + to.y]._type == "") return true;
+        }
+        return false;
+    }
+    bool attack(ct_point from,ct_point to)
+    { return move(from,to); }
+
+    Tma(Tboard board) : _board(board){}
+    Tboard _board;
 };
 
 //车
@@ -457,6 +503,26 @@ public:
 #include <windows.h>
 #endif
 
+template< class Tinput>
+void start_play(Tinput input)
+{
+    ct_point from;
+    ct_dire dire;
+    bool quit;//bool first
+    while(true)
+    {
+        if(input.input_pos(from,dire,quit,false))
+        {
+            if(quit == true)
+            { break; }
+
+
+        }
+        else
+        {}
+    }
+}
+
 int main()
 {
 #ifdef _WIN32
@@ -518,6 +584,8 @@ int main()
     in.set_board(arr_board);
     bool ij = true;
     cout<<in.input_pos(from,dire,quit,ij)<<endl;
+
+    start_play<key_input<array<array<ct_chess,9>,10>>>(in);
 
 
 
