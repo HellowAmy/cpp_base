@@ -1,26 +1,48 @@
-﻿
+﻿//!
 //!
-//! 象棋对战，双人对战，先后手，棋手，棋子，棋盘，棋子位置镜像转换
-//! 落子，棋子位置矫正，是否可以落子，重置棋盘，
+//! ===== 任务介绍 =====
+//! 使用模板化编程的方式写一个象棋游戏:
+//!     场景描述:
+//!         一般的象棋都为两个玩家对战，分先后手进行下棋，棋盘上棋子位置固定，
+//!             下棋时棋子由一个点移动到另一个点位吃子，或者移动位置。
+//!     游戏过程:
+//!         摆棋盘、先手下棋、拿去棋子、吃子获取移动、吃掉将帅或者对方认输则胜利
+//! ===== 任务介绍 =====
 //!
-//! 输入点位，矫正点位，判断类型，跟随操作
-//! 初始化附带类型，点位附带类型，容器附带点位
-//! 行棋：落子在棋盘内，符合棋子规则，棋子无阻碍（吃子：落子有敌人）
 //!
-//! 》输入指令（固定的命令）
-//!     》识别选中棋子与行动（分析棋子点位与行动方向）
-//!         》让棋子是识别行动具体（棋子根据棋子方向分析出两个坐标）
-//!             》根据坐标分析行动类型（移动或者吃子）
-//!                 》验证行动的可行性（根据棋盘与棋子类型验证这坐标可行性）
-//!                     》执行动作（回到主流程执行结果）
-//! 》获取双点位
-//!     》判断是否可行动
-//!         》交换行动点
 //!
-//! 操作：
-//! 将 士 象 马 车 炮 兵   进 退 平   上 下
-//! J  S  X  M  C  P  B   J  T  P   S  X
+//! ===== 具体规划 =====
+//! 游戏过程
+//! ==================================
+//! 》行棋 <--------                 |
+//!     》落子     ^                |
+//!         》移动 ^               |
+//!         》吃子 ^ 吃将 -> 结束  |
+//! ==============================
 //!
+//! 实现过程
+//! ===========================================================================
+//! 》输入指令（固定的命令）                                                    |
+//!     》识别选中棋子与行动（分析棋子点位与行动方向）                           |
+//!         》让棋子是识别行动具体（棋子根据棋子方向分析出两个坐标）             |
+//!             》根据坐标分析行动类型（移动或者吃子）                        |
+//!                 》验证行动的可行性（根据棋盘与棋子类型验证这坐标可行性）   |
+//!                     》执行动作（回到主流程执行结果）                    |
+//! =====================================================================
+//!
+//! 简单实现
+//! =========================
+//! 》获取双点位            |
+//!     》判断是否可行动   |
+//!         》交换行动点  |
+//! =====================
+//!
+//! 可用指令
+//! ==========================================
+//! 将 士 象 马 车 炮 兵   进 退 平   上 下   /
+//! J  S  X  M  C  P  B   J  T  P   S  X  /
+//! ======================================
+//! ===== 具体规划 =====
 //!
 #include <iostream>
 #include <cstdint>
@@ -87,7 +109,6 @@ void vswap_board(const Tpos &pos1,const Tpos &pos2,Tboard &board)
     board[pos2.y][pos2.x] = tm;
 }
 
-
 //== 棋盘方位 ==
 struct ct_point
 {
@@ -126,82 +147,10 @@ ostream& operator<<(ostream& out, const ct_point& point)
 
 ostream& operator<<(ostream& out, const ct_chess& chess)
 { return out<<"{"<<chess._type<<"|"<<chess._name<<"["<<chess._first <<"]} "; }
+//== 棋子输出 ==
 
 
-
-//解析落子点
-template<class Tboard,class Tchoose>
-class Tparse_f
-{
-public:
-    bool parse_pos(const string &cmd,ct_point &from,bool first)
-    {
-        //分解输入字符串
-        if(cmd.size() < 4) return false;
-        string n1 = to_string(cmd[0]);
-        int32_t in1 = cmd[1] -'0' -1;
-        if(in1 >= (int32_t)_board.size()) return false;
-
-        //获取棋盘列内棋子
-        vector<ct_point> vec;
-        for(size_t i=0;i<_board.size();i++)
-        {
-            if(_board[i][in1]._name == n1
-                    && _board[i][in1]._first == first)
-            { vec.push_back(ct_point{in1,(int32_t)i}); }
-        }
-        return _choose.choose_vec(from,cmd,vec);
-    }
-    void set_board(const Tboard &board) { _board = board; }
-    void set_choose(const Tchoose &choose) { _choose = choose; }
-
-private:
-    Tboard _board;
-    Tchoose _choose;
-};
-
-//解析目标位置--转发到棋子位置
-template<class Targv>
-class Tparse_t
-{
-public:
-    bool parse_pos(const string &cmd,const ct_point &from,ct_point &to)
-    {
-        if(cmd.size() < 1) return false;
-        auto it = _map.find(to_string(cmd[0])); //解析出对应棋子
-        if(it != _map.end())
-        { return (it->second)(cmd,from,to); }
-        return false;
-    }
-    void set_func(const map<string,Targv> &map) { _map = map; };
-private:
-    map<string,Targv> _map;
-};
-
-//解析落子点
-class Tchoose
-{
-public:
-    //同列出现并排棋子
-    bool choose_vec(ct_point &from,const string &cmd,vector<ct_point> vec)
-    {
-        if(vec.size() == 2)
-        {
-            //出现并列情况
-            if(cmd.size() < 5) return false;
-            if(cmd[4] == 'S')
-            { from.x = vec[0].x; from.y = vec[0].y; }
-            else if(cmd[4] == 'X')
-            { from.x = vec[1].x; from.y = vec[1].y; }
-            else return false;
-        }
-        else if(vec.size() == 1) { from.x = vec[0].x; from.y = vec[0].y; }
-        else return false;
-        return true;
-    }
-};
-
-
+//===== 棋盘点位解析 =====
 //键盘输入
 template<class Tparse_f,class Tparse_t>
 class Tkey_input
@@ -213,10 +162,13 @@ public:
         while(true)
         {
             cin>>str;
-            if(str == "quit") { quit = true; return false; }    //掀棋盘操作
-            bool ok1 = _pares_f.parse_pos(str,from,first);      //获取选择棋子点
-            bool ok2 = _pares_t.parse_pos(str,from,to);
-            return ok1 && ok2;
+            if(str == "quit") { quit = true; return false; } //掀棋盘操作
+
+            //解析出玩家选择的棋子与落点位置
+            //      获取选择棋子点，将点位传给棋子自行决定是否可以行动
+            if(_pares_f.parse_pos(str,from,first)
+                    && _pares_t.parse_pos(str,from,to)) return true;
+            else return false;
         }
     }
     void set_pares(Tparse_f parse_f,Tparse_t parse_t)
@@ -226,6 +178,93 @@ private:
     Tparse_f _pares_f;
     Tparse_t _pares_t;
 };
+
+//解析落子点
+template<class Tboard,class Tchoose>
+class Tparse_f
+{
+public:
+    bool parse_pos(const string &cmd,ct_point &from,bool first)
+    {
+        //分解输入字符串
+        if(cmd.size() < 4) { cout<<"指令长度太短"<<endl; return false; }
+        string n1 = to_string(cmd[0]);
+        int32_t in1 = cmd[1] -'0' -1;
+
+        //获取棋盘列内棋子
+        vector<ct_point> vec;
+        for(size_t i=0;i<_board->size();i++)
+        {
+            if((*_board)[i][in1]._name == n1
+                    && (*_board)[i][in1]._first == first)
+            { vec.push_back(ct_point{in1,(int32_t)i}); }
+        }
+        return _choose.choose_vec(from,cmd,vec);
+    }
+    void set_board(Tboard &board) { _board = &board; }
+    void set_choose(const Tchoose &choose) { _choose = choose; }
+
+private:
+    Tboard *_board;
+    Tchoose _choose;
+};
+
+//解析并排棋子
+class Tchoose
+{
+public:
+    //同列出现并排棋子
+    bool choose_vec(ct_point &from,const string &cmd,vector<ct_point> vec)
+    {
+        if(vec.size() == 2)
+        {
+            //出现并列情况
+            if(cmd.size() < 5) { cout<<"未指定并排棋子"<<endl; return false; }
+            if(cmd[4] == 'X')
+            { from.x = vec[0].x; from.y = vec[0].y; }
+            else if(cmd[4] == 'S')
+            { from.x = vec[1].x; from.y = vec[1].y; }
+            else { cout<<"命令不符[S or X]"<<endl; return false; }
+        }
+        else if(vec.size() == 1) { from.x = vec[0].x; from.y = vec[0].y; }
+        else { cout<<"不存在选中棋子"<<endl; return false; }
+        return true;
+    }
+};
+
+//解析目标位置--转发给指定棋子解析自身落点
+template<class Targv>
+class Tparse_t
+{
+public:
+    bool parse_pos(const string &cmd,const ct_point &from,ct_point &to)
+    {
+        if(cmd.size() < 1) return false;
+        auto it = _map.find(to_string(cmd[0])); //解析出对应棋子
+        if(it != _map.end())
+        { return (it->second)(cmd,from,to); }
+        else { cout<<"不存在棋子指令"<<endl; return false; }
+    }
+    void set_func(const map<string,Targv> &map) { _map = map; };
+private:
+    map<string,Targv> _map;
+};
+
+//template<class Tfunc,class Tfunc_n>
+//class Tchess_list
+//{
+//public:
+//    bool parse_pos(const string &cmd,const ct_point &from,ct_point &to)
+//    {
+
+//    }
+
+//private:
+//    Tfunc func;
+//    Tfunc_n func_n;
+//};
+
+//===== 棋盘点位解析 =====
 
 
 
@@ -262,8 +301,6 @@ void init_board_rank(Tboard &board)
         }
     }
 }
-
-
 
 //默认棋盘初始化
 template<class Tboard,class Ttemplate,class Ttable>
@@ -358,30 +395,36 @@ void show_board_all(const Tboard &board)
 
 
 
-////棋子模板
-//template<class Tfunc>
-//class TSchess
-//{
-//public:
-//    TSchess(ct_point pos,bool first) : _pos(pos),_first(first){}
-//    bool action(ct_point to) { return _func.action(_pos,to); }
+//===== 行动规则 =====
+//! 9l (车) (马) (象) (士) (将) (士) (象) (马) (车)
+//! 8l
+//! 7l      (炮)                         (炮)
+//! 6l (兵)      (兵)      (兵)      (兵)      (兵)
+//! 5l
+//!  l
+//! 4l
+//! 3l [兵]      [兵]      [兵]      [兵]      [兵]
+//! 2l      [炮]                         [炮]
+//! 1l
+//! 0l [车] [马] [象] [士] [将] [士] [象] [马] [车]
+//! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//!     0   1    2    3    4    5    6    7    8
 
-//private:
-//    Tfunc _func;
-//    ct_point _pos;
-//    bool _first;
-//};
+//== 判断先手阵营相等 ==
+template<class Tboard>
+bool equal_first(ct_point from,ct_point to,const Tboard &board)
+{ return board[to.y][to.x]._first == board[from.y][from.x]._first; }
 
 template<class Tboard>
-bool equal_first(ct_point from,ct_point to,Tboard board)
-{ return board[to.x][to.y]._first == board[from.x][from.y]._first; }
+bool is_exist_chess(ct_point to,const Tboard &board)
+{ return board[to.y][to.x]._name != "N"; }
 
-//===== 行动规则 =====
 //将
 template<class Tboard>
 class Tjiang
 {
 public:
+    //行动函数,每个棋子有自己的行动限制
     bool action(ct_point from,ct_point to)
     {
         cout<<"action:Tjiang"<<endl;
@@ -394,41 +437,49 @@ public:
         if(dire.x - dire.y == -1 || dire.x - dire.y == 1) ok3 = true;
         return ok1 && ok2 && ok3;
     }
-    bool move(ct_point from,ct_point to)
-    { return action(from,to); }
-    bool attack(ct_point from,ct_point to)
+
+    //障碍函数,棋子遇到障碍则无法行动
+    bool barrier(ct_point from,ct_point to)
     {
-        if(equal_first(from,to,_board)) return false;
-        return action(from,to);
+        //阵营相同则退出
+        if(is_exist_chess(to,*_board)) //判断棋子存在
+            if(equal_first(from,to,*_board)) //判断阵营相同
+                { cout<<"阵营相同"<<endl; return true; }
+        return false;
     }
 
+    //解析函数调用：
+    //  Tkey_input类调用Tparse_t类的parse_pos,
+    //  Tparse_t调用每个独立棋子注册的parse_pos函数,最终调用到这个棋子函数
     bool parse_pos(const string &cmd,const ct_point &from,ct_point &to)
     {
-        cout<<"pos from: "<<from<<endl;
+        //获取指令
         if(cmd.size() < 4) return false;
         int32_t in1 = cmd[1] -'0';
         int32_t in2 = cmd[3] -'0';
         string n2 = to_string(cmd[2]);
         to = from;
 
+        //指令解析
         if(n2 == "J")
         { to.y += in2; }
         else if(n2 == "T")
         { to.y -= in2; }
         else if(n2 == "P")
         { to.x += (in2 - in1); }
-        else return false;
+        else { cout<<"不存在指令:将[J.T.P]"<<endl; return false; }
 
-        cout<<to<<endl;
-        if(_board[to.x][to.y]._name == "N")
-        { cout<<"move"<<endl; return move(from,to); }
-        else
-        { cout<<"attack"<<endl; return attack(from,to); }
-        return false;
+        //遇到障碍等导致无法行动（相同阵营）
+        if(barrier(from,to)) return false;
+
+        //矫正并行动:将容器下标矫正为棋盘点位并行动
+        ct_point in_from = from + ct_point{1,1};
+        ct_point in_to = to + ct_point{1,1};
+        return action(in_from,in_to);
     }
 
-    Tjiang(const Tboard &board) : _board(board){}
-    Tboard _board;
+    Tjiang(const Tboard &board) : _board(&board){}
+    const Tboard *_board;
 };
 
 //士
@@ -438,6 +489,7 @@ class Tshi
 public:
     bool action(ct_point from,ct_point to)
     {
+        cout<<"action:Tshi"<<endl;
         bool ok1 = false; //限制1:落子点在宫内
         bool ok2 = false; //限制2:至少且只能移动一格距离
         bool ok3 = false; //限制3:只能斜着走
@@ -445,26 +497,40 @@ public:
         if(vrange(to,ct_point{4,1},ct_point{6,3})) ok1 = true;
         if(vrange(vabs(dire.x),0,1) || vrange(vabs(dire.y),0,1)) ok2 = true;
         if(vabs(dire.x) == 1 && vabs(dire.y) == 1) ok3 = true;
+        cout<<ok1<<ok2<<ok3<<endl;
         return ok1 && ok2 && ok3;
     }
-    bool move(ct_point from,ct_point to)
-    {
-        if(equal_first(from,to,_board)) return false;
-        return action(from,to);
-    }
-    bool attack(ct_point from,ct_point to)
-    { return move(from,to); }
 
-    bool parse_pos(const string &cmd,const ct_point &from,ct_point &to)
+    bool barrier(ct_point from,ct_point to)
     {
-
-//        if(cmd != _chess_parse._name) return _next_func->parse_pos(cmd,to);
-//        else _chess_parse.parse(cmd,to);
+        if(is_exist_chess(to,*_board))
+            if(equal_first(from,to,*_board))
+                { cout<<"阵营相同"<<endl; return true; }
         return false;
     }
 
-    Tshi(const Tboard &board) : _board(board){}
-    Tboard _board;
+    bool parse_pos(const string &cmd,const ct_point &from,ct_point &to)
+    {
+        if(cmd.size() < 4) return false;
+        int32_t in1 = cmd[1] -'0';
+        int32_t in2 = cmd[3] -'0';
+        string n2 = to_string(cmd[2]);
+        to = from;
+
+        if(n2 == "J" || n2 == "Y") //扬士
+        { to.y += 1; to.x += (in2 - in1); }
+        else if(n2 == "T" || n2 == "L") //落士
+        { to.y -= 1; to.x -= (in1 - in2);  }
+        else { cout<<"不存在指令:士[J.T.Y.L]"<<endl; return false; }
+
+        if(barrier(from,to)) return false;
+        ct_point in_from = from + ct_point{1,1};
+        ct_point in_to = to + ct_point{1,1};
+        return action(in_from,in_to);
+    }
+
+    Tshi(const Tboard &board) : _board(&board){}
+    const Tboard *_board;
 };
 
 //象
@@ -481,22 +547,43 @@ public:
         if(vabs(dire.x) == 2 && vabs(dire.y) == 2) ok2 = true;
         return ok1 && ok2;
     }
-    bool move(ct_point from,ct_point to)
+
+    bool barrier(ct_point from,ct_point to)
     {
-        if(equal_first(from,to,_board)) return false;
-        if(action(from,to)) //卡象眼
-        {
-            ct_point tm;
-            tm.x = (to.x - from.x)/2; tm.y = (to.y - from.y)/2;
-            if(_board[from.x + to.x][from.y + to.y]._type == "") return true;
-        }
+        if(is_exist_chess(to,*_board))
+            if(equal_first(from,to,*_board))
+                { cout<<"阵营相同"<<endl; return true; }
+
+        //卡象眼
+        ct_point tm;
+        tm.x = (to.x + from.x) /2; tm.y = (to.y + from.y) /2;
+        if((*_board)[tm.y][tm.x]._name != "N")
+        { cout<<"卡象眼"<<endl; return true; }
         return false;
     }
-    bool attack(ct_point from,ct_point to)
-    { return move(from,to); }
 
-    Txiang(Tboard board) : _board(board){}
-    Tboard _board;
+    bool parse_pos(const string &cmd,const ct_point &from,ct_point &to)
+    {
+        if(cmd.size() < 4) return false;
+        int32_t in1 = cmd[1] -'0';
+        int32_t in2 = cmd[3] -'0';
+        string n2 = to_string(cmd[2]);
+        to = from;
+
+        if(n2 == "F" || n2 == "J") //飞象
+        { to.y += 2; to.x += (in2 - in1); }
+        else if(n2 == "L" || n2 == "T") //落象
+        { to.y -= 2; to.x -= (in1 - in2);  }
+        else { cout<<"不存在指令:象[J.T.F.L]"<<endl; return false; }
+
+        if(barrier(from,to)) return false;
+        ct_point in_from = from + ct_point{1,1};
+        ct_point in_to = to + ct_point{1,1};
+        return action(in_from,in_to);
+    }
+
+    Txiang(const Tboard &board) : _board(&board){}
+    const Tboard *_board;
 };
 
 //马
@@ -669,11 +756,10 @@ int main()
     }
     //== 初始化经典棋盘 ==
 
-#endif
+//    array<array<ct_chess,9>,10> *pboard = &arr_board;
 
-    //声明棋子类型
-    Tjiang<arr_b> jiang(arr_board);
-    Tshi<arr_b> shi(arr_board);
+
+#endif
 
     //声明函数容器
     map<string,function
@@ -687,11 +773,18 @@ int main()
                   const ct_point &from,
                   ct_point &to)> func_m;
 
+    //声明棋子类型
+    Tjiang<arr_b> jiang(arr_board);
+    Tshi<arr_b> shi(arr_board);
+    Txiang<arr_b> xiang(arr_board);
+
     //插入解析函数
     map_func.insert(pair<string,func_m>
         ("J",bind(&Tjiang<arr_b>::parse_pos,jiang,_1,_2,_3)));
     map_func.insert(pair<string,func_m>
         ("S",bind(&Tshi<arr_b>::parse_pos,shi,_1,_2,_3)));
+    map_func.insert(pair<string,func_m>
+        ("X",bind(&Txiang<arr_b>::parse_pos,xiang,_1,_2,_3)));
 
 
     cout << "===== 输入位置 =====" << endl;
@@ -721,10 +814,10 @@ int main()
         bool first = true;
         if(input.input_pos(from,to,quit,first))
         {
-            cout<<from<<" | "<<to<<endl;
+//            cout<<from<<" | "<<to<<endl;
             move_chess(from,to,arr_board);
 //            vswap_board(from,to,arr_board);
-            cout<<from<<" | "<<to<<endl;
+//            cout<<from<<" | "<<to<<endl;
 
 
             cout<<"== 矫正棋盘显示 =="<<endl;
@@ -735,10 +828,10 @@ int main()
             cout << "===== 玩家视角 =====" << endl;
             show_board_type(arr_board);
             cout<<endl;
-            parse_f.set_board(arr_board);
+//            parse_f.set_board(arr_board);
 
         }
-        else cout<<"not input_pos"<<endl;
+        else cout<<"无效指令"<<endl;
     }
 
 
