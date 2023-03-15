@@ -1,4 +1,22 @@
 ﻿//!
+//! C++基础：模板化编程-附带象棋代码实例
+//!
+//!
+//! ===== 基本概念 =====
+//! 模板化编程基本概念:
+//!     1、数据模板化 : 泛化数据类型，对不同数据采取同一个操作
+//!     2、操作模板化 : 泛化操作流程，使接口统一忽视实现细节
+//!
+//!     模板是C++的经典编程方式之一，在C++的多泛式编程下，面向对象与模板都各占半壁江山，
+//!         模板由于可以在编译期完成绑定，所以可以将很多运行时确定的操作转移到编译期，
+//!         从而用编译时间换取运行时的速度，是追求高性能手段之一，
+//!         所以模板化编程在网络服务器、游戏引擎等要求高性能的框架中频繁出现。
+//!     模板化编程由于数据与操作的高度抽象与不确定，编程难度相比于面向对象略高一些，
+//!         使用难度的提高使得模板化编程常常被初学者的忽视，本篇文章将简单展示模板化的实例代码，
+//!         帮助初学者快速入门模板化编程的世界。
+//! ===== 基本概念 =====
+//!
+//!
 //!
 //! ===== 任务介绍 =====
 //! 使用模板化编程的方式写一个象棋游戏:
@@ -20,6 +38,13 @@
 //!         》吃子 ^ 吃将 -> 结束  |
 //! ==============================
 //!
+//! 简单实现
+//! =========================
+//! 》获取双点位            |
+//!     》判断是否可行动   |
+//!         》交换行动点  |
+//! =====================
+//!
 //! 实现过程
 //! ===========================================================================
 //! 》输入指令（固定的命令）                                                    |
@@ -30,19 +55,20 @@
 //!                     》执行动作（回到主流程执行结果）                    |
 //! =====================================================================
 //!
-//! 简单实现
-//! =========================
-//! 》获取双点位            |
-//!     》判断是否可行动   |
-//!         》交换行动点  |
-//! =====================
-//!
 //! 可用指令
 //! ==========================================
 //! 将 士 象 马 车 炮 兵   进 退 平   上 下   /
 //! J  S  X  M  C  P  B   J  T  P   S  X  /
 //! ======================================
 //! ===== 具体规划 =====
+//!
+//!
+//! 结束语:
+//!     不得不承认在具体的业务实现上，使用面向对象可以降低很多难度，
+//!         模板始终在具体实现上缺少简单可用的设计模型。
+//!     本次实现为了达到棋子的动态增加采用了面向对象里设计模式的职责链模式，
+//!         不过用模板重新进行了实现，与经典的职责链有所出入。
+//!     模板化职责链的具体代码解析将在另一篇文章中说明，如果感兴趣可去观看。
 //!
 #include <iostream>
 #include <cstdint>
@@ -163,31 +189,35 @@ public:
         while(true)
         {
             cin>>str;
+            _cmd = str;
             if(str == "quit") { quit = true; return false; } //掀棋盘操作
 
             //解析出玩家选择的棋子与落点位置
             //      获取选择棋子点，将点位传给棋子自行决定是否可以行动
-            bool ok1 = _pares_f.parse_pos(str,from,first);
-            cout<<"pos form: "<<from<<endl;
-            if(ok1)
-            {
-                bool ok2 = _pares_t.parse_pos(str,from,to);
-                cout<<"pos to: "<<to<<endl;
-                if(ok2) return true;
-            }
-            return false;
+//            bool ok1 = _pares_f.parse_pos(str,from,first);
+//            cout<<"pos form: "<<from<<endl;
+//            if(ok1)
+//            {
+//                bool ok2 = _pares_t.parse_pos(str,from,to);
+//                cout<<"pos to: "<<to<<endl;
+//                if(ok2) return true;
+//            }
+//            return false;
 
-//            if(_pares_f.parse_pos(str,from,first)
-//                    && _pares_t.parse_pos(str,from,to)) return true;
-//            else return false;
+            if(_pares_f.parse_pos(str,from,first)
+                    && _pares_t.parse_pos(str,from,to)) return true;
+            else return false;
         }
     }
+    string get_cmd() { return _cmd; }
+
     void set_pares(Tparse_f parse_f,Tparse_t parse_t)
     { _pares_f = parse_f; _pares_t = parse_t; }
 
 private:
     Tparse_f _pares_f;
     Tparse_t _pares_t;
+    string _cmd;
 };
 
 //解析落子点
@@ -870,6 +900,40 @@ public:
 };
 //===== 行动规则 =====
 
+//== 复制棋盘 ==
+template<class Tboard>
+Tboard copy_borad(const Tboard &board)
+{
+    Tboard tm;
+    for(size_t y=0;y<board.size();y++)
+        for(size_t x=0;x<board[x].size();x++)
+        { tm[y][x] = board[y][x]; }
+    return tm;
+}
+
+//== 镜像棋盘 ==
+template<class Tboard>
+void rotate_borad(Tboard &board)
+{
+    Tboard tm = copy_borad(board);
+    for(size_t y=0;y<board.size();y++)
+        for(size_t x=0;x<board[y].size();x++)
+        { board[y][x] = tm[board.size() -y -1][board[y].size() -x -1]; }
+}
+
+//!
+//!
+//! 0 1 2
+//!
+//!
+//! 9 8 7
+//!
+//!
+//!
+//0 1 2 3
+//1 1 2 3
+//2 2 2 3
+//3 3 3 3
 
 
 //== windows中文显示 ==
@@ -959,19 +1023,26 @@ int main()
 
     //===== 进入游戏 =====
     //待解析的棋子点位与状态
-    ct_point from;      //选中棋子点位
-    ct_point to;        //即将移动的点位
-    bool quit = false;  //玩家主动退出
-    bool first = true;  //先手标记
-    bool end = false;   //游戏结束标记
+    ct_point from;              //选中棋子点位
+    ct_point to;                //即将移动的点位
+    bool quit = false;          //玩家主动退出
+    bool first = true;          //先手标记
+    bool end = false;           //游戏结束标记
+    vector<string> vec_his;     //历史容器
 
+    //游戏显示棋盘与双方棋子，接收玩家落点之后移动棋子并切换落子选手
+    //      1.会记录行棋记录，结束时显示
+    //      2.会翻转棋盘显示，如果不想镜像显示可以在显示之前翻转回来
+    //          不翻转棋盘，解析棋子无法处理落点结果
+    //          因为当前棋子只解析单方位置
     while(true)
     {
         //显示信息
-        cout << "\n\n===== 玩家视角 =====" << endl;
+        cout << "\n===== 玩家视角 =====\n" << endl;
+        cout << "===== 先手:[将] | 后手:(将) =====\n" <<endl;
         show_board_type(arr_board);
-        if(first) cout << "先手玩家:" << endl;
-        else cout << "后手玩家:" << endl;
+        if(first) cout << "\n先手玩家:" << endl;
+        else cout << "\n后手玩家:" << endl;
 
         //获取输入，并判断是否胜利
         //  获取输入点位之后，会执行一系列的行棋规范判定
@@ -987,8 +1058,10 @@ int main()
                 else cout<<"后手玩家成功斩杀"<<endl;
             }
 
+            first = !first;//选手切换
             move_chess(from,to,arr_board);//移动棋子
-            first = !first;//翻转输入
+            rotate_borad(arr_board);//翻转棋盘显示
+            vec_his.push_back(input.get_cmd());//加入历史
         }
 
         //玩家退出
@@ -1003,6 +1076,12 @@ int main()
         if(end) break;
     }
     //===== 进入游戏 =====
+
+    //显示历史记录
+    cout<<"\n== 历史记录 =="<<endl;
+    for(size_t i=0;i<vec_his.size();i++)
+    { cout<<"num "<<i<<": "<<vec_his[i]<<endl; }
+    cout<<"== 历史记录 ==\n"<<endl;
 
     cout << "===== end =====" << endl;
     return 0;
