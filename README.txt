@@ -8,18 +8,26 @@
 
 	cpp_info：代码详解（片段代码，所有有关代码详解代码都在该目录）
 	cpp_design：设计模式（片段代码，所有有关设计模式代码都在该目录）
+	cpp_containers: 标准容器（片段代码，所有有关容器测试代码都在该目录）	
 ===== 文件目录信息 =====
 
 
 
 =====  子分支信息： cpp_design =====
 cpp_design目录下子分支文件：
-	chain_responsibility.cpp ：C++设计模式: 职责链-代码实例以及其他代替方案
+	chain_responsibility.cpp ：C++设计模式：职责链-代码实例以及其他代替方案
 =====  子分支信息： cpp_design =====
 
 
 
-=====  子分支信息： cpp_info=====
+=====  子分支信息： cpp_info =====
 cpp_info目录下子分支文件：
 	chain_template.cpp：C++代码详解：模板化职责链
-=====  子分支信息： cpp_info=====
+=====  子分支信息： cpp_info =====
+
+
+
+=====  子分支信息： cpp_containers =====
+cpp_containers:目录下子分支文件：
+	linear_array.cpp: C++容器：线性容器[vector - array]
+=====  子分支信息： cpp_containers =====
