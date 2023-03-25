@@ -23,6 +23,7 @@ cpp_design目录下子分支文件：
 =====  子分支信息： cpp_info =====
 cpp_info目录下子分支文件：
 	chain_template.cpp：C++代码详解：模板化职责链
+	vpool_th.cpp：C++代码详解：固定线程池
 =====  子分支信息： cpp_info =====
 
 

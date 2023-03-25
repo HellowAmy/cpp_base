@@ -4,5 +4,9 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        chain_template.cpp \
-        main.cpp
+#        chain_template.cpp \
+        main.cpp \
+        vpool_th.cpp
+
+HEADERS += \
+    ../vpool_th.h
