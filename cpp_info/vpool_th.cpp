@@ -173,67 +173,67 @@ public:
     }
 };
 
-void test()
-{
+//void test()
+//{
 
-    //===== 测试 =====
-    cout << "== begin ==" << endl;
-    future<int> fp;//外部获取返回值,销毁线程池后显示
-    int sum = 0;
+//    //===== 测试 =====
+//    cout << "== begin ==" << endl;
+//    future<int> fp;//外部获取返回值,销毁线程池后显示
+//    int sum = 0;
 
-    //创建临时区
-    {
-        test_c t;
-        vpool_th po(3);
-        auto p1 = po.add_work(work,1,2);
-        auto p2 = po.add_work(work,10,20);
-        auto p3 = po.add_work(work_sleep,1);
-        auto p4 = po.add_work(work_sleep,2);
-        fp = po.add_work(&test_c::work,t,100,20);
-        auto p5 = po.add_work(&test_c::work_sleep,t,1);
+//    //创建临时区
+//    {
+//        test_c t;
+//        vpool_th po(3);
+//        auto p1 = po.add_work(work,1,2);
+//        auto p2 = po.add_work(work,10,20);
+//        auto p3 = po.add_work(work_sleep,1);
+//        auto p4 = po.add_work(work_sleep,2);
+//        fp = po.add_work(&test_c::work,t,100,20);
+//        auto p5 = po.add_work(&test_c::work_sleep,t,1);
 
-        //获取返回值
-        int k1 = p1.get();
-        int k2 = p2.get();
+//        //获取返回值
+//        int k1 = p1.get();
+//        int k2 = p2.get();
 
-        cout<<"p:"<<k1<<"|"<<k2<<endl;
-        sum += k1 + k2;
-    }
-    cout<<"sum:"<<sum<<endl;
-    cout<<"fp:"<<fp.get()<<endl;
+//        cout<<"p:"<<k1<<"|"<<k2<<endl;
+//        sum += k1 + k2;
+//    }
+//    cout<<"sum:"<<sum<<endl;
+//    cout<<"fp:"<<fp.get()<<endl;
 
-    //累加线程池的返回值
-    cout << "== too work ==" << endl;
-    vpool_th po(50);
-    vector<future<int>> vec_sum;
-    for(int i=0;i<10000;i++)
-    {
-        vec_sum.push_back(po.add_work(work,100,100));
-    }
+//    //累加线程池的返回值
+//    cout << "== too work ==" << endl;
+//    vpool_th po(50);
+//    vector<future<int>> vec_sum;
+//    for(int i=0;i<10000;i++)
+//    {
+//        vec_sum.push_back(po.add_work(work,100,100));
+//    }
 
-    int sum2 = 0;
-    for(size_t i=0;i<vec_sum.size();i++)
-    {
-        sum2 += vec_sum[i].get();
-    }
-    cout<<"sum2: "<<sum2<<endl;
-    cout << "== end ==" << endl;
-    //===== 测试 =====
-}
+//    int sum2 = 0;
+//    for(size_t i=0;i<vec_sum.size();i++)
+//    {
+//        sum2 += vec_sum[i].get();
+//    }
+//    cout<<"sum2: "<<sum2<<endl;
+//    cout << "== end ==" << endl;
+//    //===== 测试 =====
+//}
 
-int m_main()
-{
-    cout<<"== begin =="<<endl;
+//int m_main()
+//{
+//    cout<<"== begin =="<<endl;
 
-    test();
+//    test();
 
-    cout<<"== end =="<<endl;
-    return 0;
-}
+//    cout<<"== end =="<<endl;
+//    return 0;
+//}
 
-int main()
-{
-    m_main();
-    return 0;
-}
+//int main()
+//{
+//    m_main();
+//    return 0;
+//}
 

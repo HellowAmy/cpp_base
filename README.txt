@@ -8,8 +8,16 @@
 
 	cpp_info：代码详解（片段代码，所有有关代码详解代码都在该目录）
 	cpp_design：设计模式（片段代码，所有有关设计模式代码都在该目录）
-	cpp_containers: 标准容器（片段代码，所有有关容器测试代码都在该目录）	
+	cpp_containers： 标准容器（片段代码，所有有关容器测试代码都在该目录）	
+	include：所有可直接使用的头文件都在该目录
 ===== 文件目录信息 =====
+
+
+
+===== 子分支信息： include =====
+ include目录下子分支文件：
+	vpool_th.h： 简单的可用线程池头文件
+===== 子分支信息： include =====
 
 
 
@@ -24,6 +32,7 @@ cpp_design目录下子分支文件：
 cpp_info目录下子分支文件：
 	chain_template.cpp：C++代码详解：模板化职责链
 	vpool_th.cpp：C++代码详解：固定线程池
+	string_to_type.cpp：C++代码详解: string的赋值与C风格字符串转换
 =====  子分支信息： cpp_info =====
 
 

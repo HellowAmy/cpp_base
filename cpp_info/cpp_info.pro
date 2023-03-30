@@ -6,6 +6,7 @@ CONFIG -= qt
 SOURCES += \
 #        chain_template.cpp \
         main.cpp \
+        string_to_type.cpp \
         vpool_th.cpp
 
 HEADERS += \
