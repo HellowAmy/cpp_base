@@ -10,6 +10,7 @@
 	cpp_info：代码详解（片段代码，所有有关代码详解代码都在该目录）
 	cpp_design：设计模式（片段代码，所有有关设计模式代码都在该目录）
 	cpp_containers： 标准容器（片段代码，所有有关容器测试代码都在该目录）	
+	cpp_tools： 简单工具（片段代码，所有有关工具类的测试代码都在该目录）	
 	include：所有可直接使用的头文件都在该目录
 ===== 文件目录信息 =====
 
@@ -42,3 +43,10 @@ cpp_info目录下子分支文件：
 cpp_containers:目录下子分支文件：
 	linear_array.cpp: C++容器：线性容器[vector - array]
 =====  子分支信息： cpp_containers =====
+
+
+
+=====  子分支信息： cpp_tools =====
+cpp_tools :目录下子分支文件：
+	stm.cpp: C++工具：字符串切割工具-根据分割符切割
+=====  子分支信息： cpp_tools =====
