@@ -26,6 +26,8 @@
 //!     epoll存在水平触发(LT)/边缘触发(ET),两种触发方式
 //!         水平触发:只要epool事件数组中还存在IO口未读完的数据就会让epoll_wait函数返回并进入事件处理循环
 //!         边缘触发:epool事件数组中每一次数据变化只会触发一次,不读取数据会一直留在IO口
+//!     水平触发是epoll的默认触发模式，边沿触发则属于高速性能模式，两则的性能差距尚未可知，
+//!         但边沿触发的读写处理往往更加复杂且容易引发错误
 //! ===== epoll简介 =====
 //!
 //!
@@ -83,16 +85,17 @@
 //! ===== 客户端使用方式 =====
 //!
 //!
-//! ===== 代码段展示 =====
+//! ===== 代码段展示顺序 =====
 //! 1.ux_epoll.h
 //! 2.ux_server:main.cpp
 //! 3.ux_client:main.cpp
-//! ===== 代码段展示 =====
+//! ===== 代码段展示顺序 =====
 //!
 //! 结束语:
 //!     该服务器的ux_epoll.h文件实现了一个轻量线程池,简单的TCP拆包协议,
 //!         发送数据的string接口,结构体转string等,可以完全满足小数量的简易服务器部署,
 //!         且无需任务依赖,只要支持C++11即可携带ux_epoll.h头文件在LINUX环境下到处部署IO复用服务器
+//!
 //!
 //! ux_server:main.cpp
 //! ===== 服务端代码 =====
@@ -100,22 +103,6 @@
 #include "ux_epoll.h"
 #include <cstring>
 #include <algorithm>
-
-//===== 结构体转换string函数 =====
-//结构体转string
-//      语法解析：(char*)&ct ，由&ct获取结构体地址，在由该地址(char*)转为char*类型的指针
-//      根据string构造函数，参数1：char*地址，参数2：长度，可从地址内存中复制二进制内容
-template <class T_ct>
-static string ct_s(T_ct ct)
-{ return string((char*)&ct,sizeof(T_ct)); }
-
-//string转结构体
-//      语法解析：*(T_ct*)str.c_str() ，由str.c_str()从string类获取const char*指针，
-//      由const char*指针转为T_ct*指针，再*（T_ct*）从指针中获取值，从而返回值
-template <class T_ct>
-static T_ct st_c(const string &str)
-{ T_ct ct = *(T_ct*)str.c_str(); return ct; }
-//===== 结构体转换string函数 =====
 
 
 //===== 消息处理结构体 =====
