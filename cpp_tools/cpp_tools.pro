@@ -4,6 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+        ctimel.cpp \
         main.cpp \
         stm.cpp
 
