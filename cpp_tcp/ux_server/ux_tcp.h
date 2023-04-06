@@ -16,6 +16,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace std::placeholders;
 
 
 //===== 日志宏 =====
@@ -40,6 +41,23 @@ template<typename T>
 T from_string(const string& str)
 { T t; istringstream iss(str); iss>>t; return t; }
 //== 字符串类型转换 ==
+
+
+//===== 结构体转换string函数 =====
+//结构体转string
+//      语法解析：(char*)&ct ，由&ct获取结构体地址，在由该地址(char*)转为char*类型的指针
+//      根据string构造函数，参数1：char*地址，参数2：长度，可从地址内存中复制二进制内容
+template <class T_ct>
+static string ct_s(T_ct ct)
+{ return string((char*)&ct,sizeof(T_ct)); }
+
+//string转结构体
+//      语法解析：*(T_ct*)str.c_str() ，由str.c_str()从string类获取const char*指针，
+//      由const char*指针转为T_ct*指针，再*（T_ct*）从指针中获取值，从而返回值
+template <class T_ct>
+static T_ct st_c(const string &str)
+{ T_ct ct = *(T_ct*)str.c_str(); return ct; }
+//===== 结构体转换string函数 =====
 
 
 //===== 数据管道 =====
@@ -101,12 +119,6 @@ public:
         }
     }
 
-    function<int(int)> close_cb = nullptr;  //发送失败时触发回调--用于服务器
-
-private:
-    int _fd;            //连接套接字
-    std::mutex _mutex;  //互斥锁--发送
-
     //指定发送N个字节的数据
     size_t writen(int sock,const void *buf,size_t len) const
     {
@@ -133,6 +145,12 @@ private:
         if(all != nullptr) *all = ret;
         return ret != -1u;
     }
+
+    function<void(int)> close_cb = nullptr;  //发送失败时触发回调--用于服务器
+
+private:
+    int _fd;            //连接套接字
+    std::mutex _mutex;  //互斥锁--发送
 };
 //===== 数据管道 =====
 
@@ -141,32 +159,36 @@ private:
 class ux_tcp
 {
 public:
-    shared_ptr<channel> open_tcp(int port)
+    //建立连接
+    shared_ptr<channel> open_tcp(int port,string *in_ip)
     {
-        int listensock = init_port(port);
-        if(listensock < 0) { vloge("init port err"); return nullptr; }
+        int listen = init_port(port);
+        if(listen < 0) { vloge("init port err"); return nullptr; }
 
         //建立请求，接收客户端的套接字（accept返回之后双方套接字可通信）
         struct sockaddr_in client;
         socklen_t len = sizeof(client);
-        int clientsock = accept(listensock,(struct sockaddr *)&client, &len);
+        int fd = accept(listen,(struct sockaddr *)&client, &len);
 
         //新连接进入
-        if (clientsock == -1) { vloge("accept err"); return nullptr; }
-        string str_ip = inet_ntoa(client.sin_addr);
-        thread(&channel::read_string_th,pch,clientsock,sock_read,sock_close).detach();
+        if (fd == -1) { vloge("accept err"); return nullptr; }
+        if(in_ip) *in_ip = inet_ntoa(client.sin_addr);
 
-        if(sock_new) sock_new(str_ip);
-        *pch = make_shared<channel>(clientsock);
-        return *pch;
+        _pch = make_shared<channel>(fd);
+        thread(&channel::read_string_th,_pch,fd,sock_read,
+               bind(&ux_tcp::close_connect,this)).detach();
+        return _pch;
     }
 
-    function<void(const string &ip)> sock_new = nullptr;    //新连接
+    //关闭连接
+    void close_connect()
+    { close(_pch->get_fd()); if(sock_close) sock_close(); }
+
     function<void()> sock_close = nullptr;                  //关闭连接
     function<void(const string &msg)> sock_read = nullptr;  //读取数据
 
 private:
-    shared_ptr<channel> *pch;
+    shared_ptr<channel> _pch; //数据管道
 
     //! 初始化监听端口，返回套接字
     //! 返回值：
@@ -211,19 +233,21 @@ public:
         int fd = init_connect(ip,port);
         if(fd < 0) { return nullptr; }
 
-        thread(&channel::read_string_th,pch,fd,sock_read,sock_close).detach();
-        if(sock_new) sock_new();
-        *pch = make_shared<channel>(fd);
-        return *pch;
+        _pch = make_shared<channel>(fd);
+        thread(&channel::read_string_th,_pch,fd,sock_read,
+               bind(&ux_client::close_connect,this)).detach();
+        return _pch;
     }
 
-    function<void()> sock_new = nullptr;                    //新连接
+    //关闭连接
+    void close_connect()
+    { close(_pch->get_fd()); if(sock_close) sock_close(); }
+
     function<void()> sock_close = nullptr;                  //关闭连接
     function<void(const string &msg)> sock_read = nullptr;  //读取数据
 
 private:
-    shared_ptr<channel> *pch;
-
+    shared_ptr<channel> _pch; //数据管道
 
     //! 网络连接初始化
     //! 返回值：

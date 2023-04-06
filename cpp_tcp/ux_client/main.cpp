@@ -1,5 +1,5 @@
-#include "ux_tcp.h"
-#include "ux_protocol.h"
+#include "../ux_server/ux_tcp.h"
+#include "../ux_server/ux_protocol.h"
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -7,30 +7,29 @@
 using namespace std;
 
 
-
 int main()
 {
+    const string ip = "127.0.0.1";
     const int port = 5005;
-    string ip;
     bool is_run = true;
-    ux_tcp server;
+    ux_client client;
 
-    server.sock_close = [&](){
+    client.sock_close = [&](){
         cout<<"sock_close"<<endl;
         is_run = false;
     };
 
-    server.sock_read = [=](const string &msg){
+    client.sock_read = [=](const string &msg){
         cout<<"== sock_read =="<<endl;
         parse_msg(msg);
 //        cout<<"sock_read: "<<msg<<endl;
     };
 
-    cout<<"server: 5005"<<endl;
-    auto sock = server.open_tcp(port,&ip);
+    cout<<"client: "<<ip<<" | "<<port<<endl;
+    auto sock = client.open_connect(ip,port);
     if(sock == nullptr) { cout<<"open_tcp err"<<endl; return -1; }
 
-    cout<<"connect: in "<<ip<<endl;
+    cout<<"connect: in"<<endl;
     while (is_run)
     {
         string str;

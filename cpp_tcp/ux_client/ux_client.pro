@@ -7,5 +7,4 @@ SOURCES += \
         main.cpp
 
 HEADERS += \
-    ux_protocol.h \
-    ux_tcp.h
+    ../ux_server/ux_tcp.h
