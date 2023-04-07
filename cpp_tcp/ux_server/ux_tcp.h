@@ -1,3 +1,6 @@
+//!
+//! ux_tcp.h
+//!
 #ifndef UX_TCP_H
 #define UX_TCP_H
 
@@ -169,6 +172,7 @@ public:
         struct sockaddr_in client;
         socklen_t len = sizeof(client);
         int fd = accept(listen,(struct sockaddr *)&client, &len);
+        close(listen); //断开监听套接字，防止新的客户端连接
 
         //新连接进入
         if (fd == -1) { vloge("accept err"); return nullptr; }

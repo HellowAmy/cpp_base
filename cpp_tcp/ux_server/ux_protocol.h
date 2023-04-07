@@ -1,3 +1,6 @@
+//!
+//! ux_protocol.h
+//!
 #ifndef UX_PROTOCOL_H
 #define UX_PROTOCOL_H
 
@@ -117,6 +120,7 @@ bool send_file(const string &filename,shared_ptr<channel> pch)
         ofs.seekg(0,ios::end);
         ct.size_file = ofs.tellg();
         ofs.seekg(0,ios::beg);
+        cout<<"send file: "<<filename<<endl;
 
         //首次发送
         ct.is_begin = true;
@@ -140,6 +144,8 @@ bool send_file(const string &filename,shared_ptr<channel> pch)
         pch->send_msg(ct_s<ct_msg>(ct));
     }
     else return false;
+
+    cout<<"send finish: "<<filename<<endl;
     return true;
 }
 
@@ -159,15 +165,14 @@ bool send_txt(const string &str,shared_ptr<channel> pch)
 void parse_msg(const string &msg)
 {
     ct_msg ct = st_c<ct_msg>(msg);
-    if(ct.is_file)
+    if(ct.is_file) //如果是文件的处理方式
     {
         static fstream ofs;
-        static size_t size_len = 0;
 
         //首次接收
         if(ct.is_begin)
         {
-            vlogd("== begin ==");
+            cout<<"begin recv file: "<<ct.filename<<endl;
             ofs.open(string(ct.filename),ios::out);
             if(ofs.is_open() == false) { vlogw("== open err =="); }
             return; //提前返回
@@ -176,22 +181,14 @@ void parse_msg(const string &msg)
         //最后一次
         if(ct.is_end)
         {
-            vlogd("== end ==");
+            cout<<"recv file finish: "<<ct.filename<<endl;
             ofs.close();
-            size_t tm = size_len;
-            size_len = 0;
-            if(tm != ct.size_file) { vlogw("not equal: " vv(tm) vv(ct.size_file)); }
             return; //提前返回
         }
 
-        //发送中
-        if(ofs.is_open())
-        {
-            ofs.write(ct.buf,ct.size_buf);
-            size_len += ofs.tellg();
-        }
+        if(ofs.is_open()) { ofs.write(ct.buf,ct.size_buf); } //发送中
     }
-    else { cout<<"read: "<<ct.buf<<endl;}
+    else { cout<<"read: "<<ct.buf<<endl; } //信息的处理方式--打印
 }
 
 //== 解析命令 ==

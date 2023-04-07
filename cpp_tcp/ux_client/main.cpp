@@ -1,3 +1,6 @@
+//!
+//! ux_client.h : main
+//!
 #include "../ux_server/ux_tcp.h"
 #include "../ux_server/ux_protocol.h"
 #include <iostream>
@@ -5,7 +8,6 @@
 #include <fstream>
 
 using namespace std;
-
 
 int main()
 {
@@ -20,9 +22,7 @@ int main()
     };
 
     client.sock_read = [=](const string &msg){
-        cout<<"== sock_read =="<<endl;
         parse_msg(msg);
-//        cout<<"sock_read: "<<msg<<endl;
     };
 
     cout<<"client: "<<ip<<" | "<<port<<endl;
@@ -34,9 +34,8 @@ int main()
     {
         string str;
         cin>>str;
-        if(is_run == false) break;
+        if(str == "exit" || is_run == false) break;
         is_run = parse_cmd(str,sock);
-//        is_run = sock->send_msg(str);
     }
 
     cout<<"===== end ====="<<endl;
