@@ -3,7 +3,7 @@
 	代码发布的博客连接：https://blog.csdn.net/WORK_GAME_LINE 。
 
 	cpp_virtual	：C++基础：实现多态以及代替多态的方法
-	cpp_iofiles	：C++基础：C++与C风格文件读写方式比对
+	cpp_iofiles	：C++基础：C++与C风格文件读写
 	cpp_oop		：C++基础：面向对象-附带五子棋代码实例
 	cpp_template	：C++基础：模板化编程-附带象棋代码实例
 	cpp_epoll	：C++网络：IO复用epoll服务器-附带网络聊天室代码实例
