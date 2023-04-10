@@ -4,5 +4,6 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        linear_array.cpp \
+        index_containers.cpp \
+#        linear_array.cpp \
         main.cpp
