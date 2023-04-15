@@ -8,4 +8,8 @@ SOURCES += \
         main.cpp \
         stm.cpp
 
-HEADERS +=
+HEADERS += \
+    ctimel.h \
+    queue_th.h \
+    stm.h \
+    vector_th.h
