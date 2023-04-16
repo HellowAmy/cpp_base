@@ -128,7 +128,7 @@ void test_2()
 void test_3()
 {
     //基本类型操作测试
-    cout<<"===== queue_th ====="<<endl;
+    cout<<endl<<"===== queue_th ====="<<endl;
     queue_th<int> thq1;
     thq1.push(11);
     thq1.push(12);
@@ -212,6 +212,7 @@ void test_3()
 
 void test_4()
 {
+    cout<<endl<<"===== vector_th ====="<<endl;
     vector_th<string> v1;
     v1.push_back("v1");
     v1.push_back("v2");
@@ -276,6 +277,7 @@ void test_4()
 
 void test_5()
 {
+    cout<<endl<<"===== map_th ====="<<endl;
     int v2=20;
     int v3=30;
     int v5=50;
@@ -335,7 +337,66 @@ void test_5()
 
     cout<<ms1.size()<<endl;
     cout<<count<<endl;
+}
 
+#include <unistd.h>
+void test_6()
+{
+    //迭代器易位测试
+    cout<<endl<<"== 迭代器易位测试 =="<<endl;
+    vector_th<string> v1;
+    v1.reserve(10);
+    v1.push_back("word_1");
+    v1.push_back("word_2");
+    v1.push_back("word_3");
+
+    //初始化的数据量
+    cout<<v1.capacity()<<"|"<<v1.size()<<endl;
+
+    //拿到迭代器,延时时候使用(模拟多线程下被时间切片打断操作)
+    auto func1 = [&](){
+        auto it1 = v1.begin();
+        cout<<"对比点: "<<*it1<<endl;
+        sleep(1);   //延时使得多线程下一定被其他线程插入操作
+        it1++;
+        cout<<"对比点: "<<*it1<<endl; //多线程操作迭代器之后,迭代器易位,打印非法数据
+    };
+
+    //往容器添加数据(模拟多线程下迭代器失效)
+    auto func2 = [&](){
+        v1.insert(v1.begin()+1,"add word"); //其他线程插入操作
+    };
+
+    cout<<"单线程操作迭代器"<<endl;
+    func1();
+    func2();
+
+    cout<<"===== show ====="<<endl;
+    for(auto a:v1)
+    {
+        cout<<a<<endl;
+    }
+
+    v1.clear();
+    v1.reserve(10);
+    v1.push_back("word_1");
+    v1.push_back("word_2");
+    v1.push_back("word_3");
+
+    cout<<endl<<"多线程操作迭代器"<<endl;
+    thread th1(func1);
+    thread th2(func2);
+    th1.join();
+    th2.join();
+
+    cout<<"===== show ====="<<endl;
+    for(auto a:v1)
+    {
+        cout<<a<<endl;
+    }
+
+    //多线程添加数据之后的数据量
+    cout<<v1.capacity()<<"|"<<v1.size()<<endl;
 }
 
 int main()
@@ -343,9 +404,113 @@ int main()
     cout<<"===== begin ====="<<endl;
 //    test_1();
 //    test_2();
-//    test_3();
-//    test_4();
+    test_3();
+    test_4();
     test_5();
+    test_6();
     cout<<"===== end ====="<<endl;
     return 0;
 }
+
+
+/*
+ * 多线程容器接口测试
+ *
+
+===== begin =====
+
+===== queue_th =====
+=====
+11
+12
+13
+14
+15
+=====
+s11
+s22
+s33
+s44
+s55
+s66
+s77
+=====
+600
+=====
+600
+600
+600
+swap front: 0
+swap after: 600
+
+===== vector_th =====
+5
+5
+5
+=====
+v1
+v2
+v3
+v4
+v5
+=====
+v1
+v2
+v3
+v4
+v5
+=====
+v3
+v4
+=====
+capacity: 8
+size: 6
+=====
+v0
+v1
+v2
+v3
+v4
+v5
+=====
+30000
+
+===== map_th =====
+1|10
+2|20
+3|30
+4|40
+5|50
+6|60
+7|70
+7
+7
+7
+0
+4
+904
+2700
+
+== 迭代器易位测试 ==
+10|3
+单线程操作迭代器
+对比点: word_1
+对比点: word_2
+===== show =====
+word_1
+add word
+word_2
+word_3
+
+多线程操作迭代器
+对比点: word_1
+对比点: add word
+===== show =====
+word_1
+add word
+word_2
+word_3
+10|4
+===== end =====
+
+*/

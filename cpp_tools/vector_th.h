@@ -6,7 +6,7 @@
 #include <memory>
 
 //!
-//! 功能: 对vector容器加锁,保证多线程安全
+//! 功能: 对vector容器加锁,保证多线程下调用接口安全,不保证迭代器安全
 //! 原理:保护继承vector容器,实现大部分函数接口, 使用继承构造获取大部分父类构造函数
 //!
 template<typename _Tp, typename _Alloc = std::allocator<_Tp> >
@@ -96,20 +96,20 @@ public:
     { lock_t lock(_mutex); parent::assign(__l); }
 
     iterator insert(const_iterator __position, const value_type& __x)
-    { lock_t lock(_mutex); parent::insert(__position,__x); }
+    { lock_t lock(_mutex); return parent::insert(__position,__x); }
 
     iterator insert(const_iterator __position, value_type&& __x)
-    { lock_t lock(_mutex); parent::insert(__position,std::move(__x)); }
+    { lock_t lock(_mutex); return parent::insert(__position,std::move(__x)); }
 
     iterator insert(const_iterator __position, std::initializer_list<value_type> __l)
-    { lock_t lock(_mutex); parent::insert(__position,__l); }
+    { lock_t lock(_mutex); return parent::insert(__position,__l); }
 
     iterator insert(const_iterator __position, size_type __n, const value_type& __x)
-    { lock_t lock(_mutex); parent::insert(__position,__n,__x); }
+    { lock_t lock(_mutex); return parent::insert(__position,__n,__x); }
 
     template<typename _InputIterator, typename = std::_RequireInputIter<_InputIterator>>
     iterator insert(const_iterator __position, _InputIterator __first, _InputIterator __last)
-    { lock_t lock(_mutex); parent::insert(__position,__first,__last); }
+    { lock_t lock(_mutex); return parent::insert(__position,__first,__last); }
 
     void resize(size_type __new_size)
     { lock_t lock(_mutex); parent::resize(__new_size); }
@@ -153,5 +153,4 @@ public:
 protected:
     std::mutex _mutex;
 };
-
 #endif // VECTOR_TH_H

@@ -5,25 +5,10 @@
 #include <mutex>
 #include <memory>
 
-
-#include <bits/stl_tree.h>
-#include <bits/stl_map.h>
-#include <bits/stl_multimap.h>
-#include <bits/range_access.h>
-#include <bits/erase_if.h>
-
-#include <bits/functexcept.h>
-#include <bits/concept_check.h>
-//#if __cplusplus >= 201103L
-#include <initializer_list>
-#include <tuple>
-
-using namespace std;
-
-//template <typename _Key, typename _Tp, typename _Compare = std::less<_Key>,
-//      typename _Alloc = std::allocator<std::pair<const _Key, _Tp> > >
-//  class map
-
+//!
+//! 功能: 对map容器加锁,保证多线程下调用接口安全,不保证迭代器安全
+//! 原理:保护继承map容器,实现大部分函数接口, 使用继承构造获取大部分父类构造函数
+//!
 template <typename _Key, typename _Tp, typename _Compare = std::less<_Key>,
       typename _Alloc = std::allocator<std::pair<const _Key, _Tp> > >
 class map_th : protected std::map<_Key,_Tp,_Compare,_Alloc>
@@ -37,7 +22,7 @@ public:
 
     typedef typename __gnu_cxx::__alloc_traits<_Alloc>::
             template rebind<value_type>::other                          _Pair_alloc_type;
-    typedef _Rb_tree<key_type, value_type, _Select1st<value_type>,
+    typedef std::_Rb_tree<key_type, value_type, std::_Select1st<value_type>,
              key_compare, _Pair_alloc_type>                             _Rep_type;
 
     typedef __gnu_cxx::__alloc_traits<_Pair_alloc_type>         _Alloc_traits;
@@ -108,7 +93,7 @@ public:
     { lock_t lock(_mutex); return parent::insert(move(__x)); }
 
     template<typename _Pair>
-    __enable_if_t<is_constructible<value_type, _Pair>::value,pair<iterator, bool>>
+    std::__enable_if_t<std::is_constructible<value_type, _Pair>::value,std::pair<iterator, bool>>
     insert(_Pair&& __x)
     { lock_t lock(_mutex); return parent::insert(std::forward<_Pair>(__x)); }
 
@@ -122,7 +107,7 @@ public:
     { lock_t lock(_mutex); return parent::insert(__position,move(__x)); }
 
     template<typename _Pair>
-    __enable_if_t<is_constructible<value_type, _Pair>::value, iterator>
+    std::__enable_if_t<std::is_constructible<value_type, _Pair>::value, iterator>
     insert(const_iterator __position, _Pair&& __x)
     { lock_t lock(_mutex); return parent::insert(__position,std::forward<_Pair>(__x)); }
 
