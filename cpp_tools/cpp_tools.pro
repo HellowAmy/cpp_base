@@ -10,6 +10,7 @@ SOURCES += \
 
 HEADERS += \
     ctimel.h \
+    map_th.h \
     queue_th.h \
     stm.h \
     vector_th.h

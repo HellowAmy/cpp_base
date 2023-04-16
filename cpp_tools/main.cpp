@@ -2,11 +2,14 @@
 #include "stm.h"
 #include "queue_th.h"
 #include "vector_th.h"
+#include "map_th.h"
 
 #include <queue>
 #include <vector>
 #include <iostream>
 #include <thread>
+#include <map>
+#include <atomic>
 using namespace std;
 
 //===== for =====
@@ -271,13 +274,78 @@ void test_4()
     cout<<veci1.size()<<endl;
 }
 
+void test_5()
+{
+    int v2=20;
+    int v3=30;
+    int v5=50;
+    int v6=60;
+
+    //插入测试
+    map_th<int,int> mm1;
+    mm1.insert(pair<int,int>(1,10));
+    mm1.insert(pair<int,int>(2,v2));
+    mm1.insert(pair<int,int>(3,std::move(v3)));
+    mm1.emplace(4,40);
+    mm1.emplace(5,v5);
+    mm1.emplace(6,std::move(v6));
+    mm1.emplace_hint(mm1.begin(),pair<int,int>(7,70));
+
+    for(const auto &a : mm1)
+    {
+        cout<<a.first<<"|"<<a.second<<endl;
+    }
+    cout<<mm1.size()<<endl;
+
+    //赋值测试
+    map_th<int,int> mm2(mm1);
+    map_th<int,int> mm3(std::move(mm1));
+
+    cout<<mm2.size()<<endl;
+    cout<<mm3.size()<<endl;
+    cout<<mm1.size()<<endl;
+
+    auto it = mm2.begin();
+    for(int i=0;i<3;i++) it++;
+    mm2.erase(mm2.begin(),it);
+    cout<<mm2.size()<<endl;
+
+    //多线程测试
+    map_th<int,string> ms1;
+    ms1.emplace(11,"ss1");
+    ms1.emplace(12,"ss2");
+    ms1.emplace(13,"ss3");
+    ms1.emplace(14,"ss4");
+
+    atomic<int> count {0};
+    auto func = [&](){
+        for(int i=100;i<1000;i++)
+        {
+            count++;
+            ms1.emplace(i,"push");
+        }
+    };
+
+    thread t1(func);
+    thread t2(func);
+    thread t3(func);
+    t1.join();
+    t2.join();
+    t3.join();
+
+    cout<<ms1.size()<<endl;
+    cout<<count<<endl;
+
+}
+
 int main()
 {
     cout<<"===== begin ====="<<endl;
 //    test_1();
 //    test_2();
 //    test_3();
-    test_4();
+//    test_4();
+    test_5();
     cout<<"===== end ====="<<endl;
     return 0;
 }
