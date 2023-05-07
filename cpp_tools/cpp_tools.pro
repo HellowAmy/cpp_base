@@ -5,10 +5,12 @@ CONFIG -= qt
 
 SOURCES += \
         ctimel.cpp \
-        main.cpp \
+#        main.cpp \
+        main.c \
         stm.cpp
 
 HEADERS += \
+    Tlien_c.h \
     ctimel.h \
     map_th.h \
     queue_th.h \
