@@ -6,7 +6,8 @@ CONFIG -= qt
 SOURCES += \
         ctimel.cpp \
 #        main.cpp \
-        main.c \
+#        main.c \
+    main_Tlist.c \
         stm.cpp
 
 HEADERS += \
