@@ -1,11 +1,291 @@
 #ifndef TLINE_AC_H
 #define TLINE_AC_H
 
+
+
+
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+//#define Tlist_create(Tapi,Tvalue)
 
+
+
+
+//#define Tvalue char *
+//#define Tlist_for(head,it,Tapi) for(Tlist_##Tapi *it = head.next;it != NULL;it = it->next)
+//#define Tlist_for_p(head,it,Tapi) for(Tlist_##Tapi *it = head->next;it != NULL;it = it->next)
+
+#define Tlist_Tbuild(Tapi,Tvalue)                                                                   \
+typedef struct Tls_##Tapi Tls_##Tapi;                                                               \
+struct Tls_##Tapi                                                                                   \
+{                                                                                                   \
+    Tvalue  value;                                                                                  \
+    Tls_##Tapi *prev;                                                                               \
+    Tls_##Tapi *next;                                                                               \
+};                                                                                                  \
+                                                                                                    \
+typedef struct Tlist_##Tapi Tlist_##Tapi;                                                           \
+struct Tlist_##Tapi                                                                                 \
+{                                                                                                   \
+    void    (*alloc)       (Tls_##Tapi *head,const Tvalue value);                                   \
+    void    (*free)        (Tls_##Tapi *head);                                                      \
+    void    (*init)        (Tls_##Tapi *head);                                                      \
+    void    (*push_back)   (Tlist_##Tapi *head,const Tvalue value);                                 \
+    void    (*push_front)  (Tlist_##Tapi *head,const Tvalue value);                                 \
+    int     (*insert)      (Tlist_##Tapi *head,size_t pos,const Tvalue value);                      \
+    void    (*pop_back)    (Tlist_##Tapi *head);                                                    \
+    void    (*pop_front)   (Tlist_##Tapi *head);                                                    \
+    int     (*erase)       (Tlist_##Tapi *head,size_t pos);                                         \
+    void    (*clear)       (Tlist_##Tapi *head);                                                    \
+    size_t  size;                                                                                   \
+    Tls_##Tapi *head;                                                                               \
+};                                                                                                  \
+                                                                                                    \
+static void list_init_##Tapi(Tls_##Tapi *head)                                                      \
+{                                                                                                   \
+    if(head == NULL) return;                                                                        \
+    head->prev = NULL;                                                                              \
+    head->next = NULL;                                                                              \
+}                                                                                                   \
+                                                                                                    \
+static void list_push_back_##Tapi(Tlist_##Tapi *ls,const Tvalue value)                              \
+{                                                                                                   \
+    if(ls->head == NULL) return;                                                                    \
+    Tls_##Tapi *new_value = (Tls_##Tapi *)malloc(sizeof(Tls_##Tapi));                               \
+    list_init_##Tapi(new_value);                                                                    \
+                                                                                                    \
+    if(ls->size == 0)                                                                               \
+    {                                                                                               \
+        ls->head->prev = new_value;                                                                 \
+        ls->head->next = new_value;                                                                 \
+        new_value->prev = ls->head;                                                                 \
+    }                                                                                               \
+    else                                                                                            \
+    {                                                                                               \
+        new_value->prev = ls->head->prev;                                                           \
+        ls->head->prev->next = new_value;                                                           \
+        ls->head->prev = new_value;                                                                 \
+    }                                                                                               \
+    ls->size += 1;                                                                                  \
+    ls->alloc(new_value,value);                                                                     \
+}                                                                                                   \
+                                                                                                    \
+static void list_push_front_##Tapi(Tlist_##Tapi *ls,const Tvalue value)                             \
+{                                                                                                   \
+    if(ls->head == NULL) return;                                                                    \
+    Tls_##Tapi *new_value = (Tls_##Tapi *)malloc(sizeof(Tls_##Tapi));                               \
+    list_init_##Tapi(new_value);                                                                    \
+                                                                                                    \
+    if(ls->size == 0)                                                                               \
+    {                                                                                               \
+        ls->head->prev = new_value;                                                                 \
+        ls->head->next = new_value;                                                                 \
+        new_value->prev = ls->head;                                                                 \
+    }                                                                                               \
+    else                                                                                            \
+    {                                                                                               \
+        ls->head->next->prev = new_value;                                                           \
+        new_value->next = ls->head->next;                                                           \
+        new_value->prev = ls->head;                                                                 \
+        ls->head->next = new_value;                                                                 \
+    }                                                                                               \
+    ls->size += 1;                                                                                  \
+    ls->alloc(new_value,value);                                                                     \
+}                                                                                                   \
+                                                                                                    \
+static int list_insert_##Tapi(Tlist_##Tapi *ls,size_t pos,const Tvalue value)                       \
+{                                                                                                   \
+    if(ls->head == NULL || pos >= ls->size) return 0;                                               \
+    Tls_##Tapi *new_value = (Tls_##Tapi *)malloc(sizeof(Tls_##Tapi));                               \
+    list_init_##Tapi(new_value);                                                                    \
+                                                                                                    \
+    size_t count = 0;                                                                               \
+    Tls_##Tapi *it = ls->head->next;                                                                \
+    for(;it != NULL;it = it->next)                                                                  \
+    {                                                                                               \
+        if(count == pos) break;                                                                     \
+        count++;                                                                                    \
+    }                                                                                               \
+                                                                                                    \
+    new_value->next = it;                                                                           \
+    new_value->prev = it->prev;                                                                     \
+    it->prev->next = new_value;                                                                     \
+    it->prev = new_value;                                                                           \
+                                                                                                    \
+    ls->size += 1;                                                                                  \
+    ls->alloc(new_value,value);                                                                     \
+    return 1;                                                                                       \
+}                                                                                                   \
+                                                                                                    \
+static void list_pop_back_##Tapi(Tlist_##Tapi *ls)                                                  \
+{                                                                                                   \
+    if(ls->head == NULL || ls->size == 0) return ;                                                  \
+    ls->size -= 1;                                                                                  \
+                                                                                                    \
+    Tls_##Tapi *end = ls->head->prev;                                                               \
+    ls->head->prev = end->prev;                                                                     \
+    end->prev->next = NULL;                                                                         \
+    ls->free(end);                                                                                  \
+    free(end);                                                                                      \
+}                                                                                                   \
+                                                                                                    \
+static void list_pop_front_##Tapi(Tlist_##Tapi *ls)                                                 \
+{                                                                                                   \
+    if(ls->head == NULL || ls->size == 0) return ;                                                  \
+    ls->size -= 1;                                                                                  \
+                                                                                                    \
+    Tls_##Tapi *begin = NULL;                                                                       \
+    if(ls->size == 0)                                                                               \
+    {                                                                                               \
+        begin = ls->head->next;                                                                     \
+        ls->head->next = NULL;                                                                      \
+    }                                                                                               \
+    else                                                                                            \
+    {                                                                                               \
+        begin = ls->head->next;                                                                     \
+        ls->head->next = begin->next;                                                               \
+        begin->next->prev = ls->head;                                                               \
+    }                                                                                               \
+    ls->free(begin);                                                                                \
+    free(begin);                                                                                    \
+}                                                                                                   \
+                                                                                                    \
+static int list_erase_##Tapi(Tlist_##Tapi *ls,size_t pos)                                           \
+{                                                                                                   \
+    if(ls->head == NULL || ls->size == 0 || pos >= ls->size) return 0;                              \
+    ls->size -= 1;                                                                                  \
+                                                                                                    \
+    size_t count = 0;                                                                               \
+    Tls_##Tapi *it = ls->head->next;                                                                \
+    for(;it != NULL;it = it->next)                                                                  \
+    {                                                                                               \
+        if(count == pos) break;                                                                     \
+        count++;                                                                                    \
+    }                                                                                               \
+                                                                                                    \
+    Tls_##Tapi *now = NULL;                                                                         \
+    if(pos == ls->size || ls->size == 0)                                                            \
+    {                                                                                               \
+        now = it;                                                                                   \
+        it->prev->next = NULL;                                                                      \
+        ls->head->prev = it->prev;                                                                  \
+    }                                                                                               \
+    else                                                                                            \
+    {                                                                                               \
+        now = it;                                                                                   \
+        it->prev->next = it->next;                                                                  \
+        it->next->prev = it->prev;                                                                  \
+                                                                                                    \
+    }                                                                                               \
+    ls->free(now);                                                                                  \
+    free(now);                                                                                      \
+    return 1;                                                                                       \
+}                                                                                                   \
+                                                                                                    \
+static void list_clear_##Tapi(Tlist_##Tapi *ls)                                                     \
+{                                                                                                   \
+    if(ls->head == NULL) return;                                                                    \
+    while(1)                                                                                        \
+    {                                                                                               \
+        Tls_##Tapi *begin = ls->head->next;                                                         \
+        if(begin == NULL) break;                                                                    \
+        ls->head->next = ls->head->next->next;                                                      \
+        ls->free(begin);                                                                            \
+        free(begin);                                                                                \
+    }                                                                                               \
+    ls->size = 0;                                                                                   \
+}                                                                                                   \
+                                                                                                    \
+static Tlist_##Tapi* Topen_##Tapi                                                                   \
+    (void (*alloc)(Tls_##Tapi *head,const Tvalue value),                                            \
+     void (*free)(Tls_##Tapi *head))                                                                \
+{                                                                                                   \
+    Tlist_##Tapi *ls = (Tlist_##Tapi *)malloc(sizeof(Tlist_##Tapi));                                \
+    ls->head = (Tls_##Tapi*)malloc(sizeof(Tls_##Tapi));                                             \
+                                                                                                    \
+    ls->alloc       = alloc;                                                                        \
+    ls->free        = free;                                                                         \
+    ls->init        = list_init_##Tapi;                                                             \
+    ls->push_back   = list_push_back_##Tapi;                                                        \
+    ls->push_front  = list_push_front_##Tapi;                                                       \
+    ls->insert      = list_insert_##Tapi;                                                           \
+    ls->pop_back    = list_pop_back_##Tapi;                                                         \
+    ls->pop_front   = list_pop_front_##Tapi;                                                        \
+    ls->erase       = list_erase_##Tapi;                                                            \
+    ls->clear       = list_clear_##Tapi;                                                            \
+                                                                                                    \
+    ls->size = 0;                                                                                   \
+    ls->init(ls->head);                                                                             \
+    return ls;                                                                                      \
+}                                                                                                   \
+                                                                                                    \
+static void Tclose_##Tapi(Tlist_##Tapi *ls)                                                         \
+{                                                                                                   \
+    ls->clear(ls);                                                                                  \
+    free(ls->head);                                                                                 \
+    free(ls);                                                                                       \
+}
+
+//定义生成浅拷贝分配器
+#define Tac_Tdefault(Tapi,Tvalue)                                               \
+static void Tmalloc_##Tapi(Tls_##Tapi *head,Tvalue value)                       \
+{ head->value = value; }                                                        \
+static void Tfree_##Tapi(Tls_##Tapi *head)                                      \
+{ }                                                                             \
+
+//定义生成字符串分配器
+#define Tac_Tcharp(Tapi)                                                        \
+static void Tmalloc_Tcharp(Tls_##Tapi *head,const char* value)                  \
+{                                                                               \
+    head->value = (char*)malloc(strlen(value) +1);                              \
+    strncpy(head->value,value,strlen(value));                                   \
+    head->value[strlen(value)] = '\0';                                          \
+}                                                                               \
+static void Tfree_Tcharp(Tls_##Tapi *head)                                      \
+{ free(head->value); }                                                          \
+
+
+
+//== 定义生成对应类型代码 + 浅拷贝分配器 ==
+#define Tls_Tbase(Tapi,Tvalue)                  \
+    Tlist_Tbuild(Tapi,Tvalue)                   \
+    Tac_Tdefault(Tapi,Tvalue)                   \
+
+//== 定义生成对应类型代码 + 字符串分配器 ==
+#define Tls_Tcharp()                            \
+    Tlist_Tbuild(Tcharp,char *)                 \
+    Tac_Tcharp(Tcharp)                          \
+
+//===== 最终代码生成 =====
+//基础类型(浅拷贝存储)
+Tls_Tbase(Tchar,char)
+Tls_Tbase(Tshort,short)
+Tls_Tbase(Tint,int)
+Tls_Tbase(Tlonglong,long long)
+Tls_Tbase(Tfloat,float)
+Tls_Tbase(Tdouble,double)
+
+//字符串（深拷贝特例）
+Tls_Tcharp()
+//===== 最终代码生成 =====
+
+
+
+//（1）整数类型：byte、short、int、long
+//（2）小数类型：float、double
+//（3）字符类型：char
+//（4）布尔类型：boolean
+
+//#define Tlist_Tmake(Tapi,Tvalue) \
+//    Tlist_Tbuild(Tint,##Tvalue)
+
+
+#if 0
 #define Tlist_for(it,head) for(Tlist_c *it = head.next;it != NULL;it = it->next)
 #define Tlist_for_p(it,head) for(Tlist_c *it = head->next;it != NULL;it = it->next)
 
@@ -19,7 +299,7 @@ typedef struct Tlist_c Tlist_c;
 struct Tlist_c
 {
     Tvalue  value;
-    size_t  size;
+//    size_t  size;
     Tlist_c *prev;
     Tlist_c *next;
 };
@@ -28,17 +308,18 @@ struct Tlist_c
 typedef struct Tlist_ac Tlist_ac;
 struct Tlist_ac
 {
-    void    (*alloc)       (Tlist_c *head,Tvalue value);
+    void    (*alloc)       (Tlist_c *head,const Tvalue value);
     void    (*free)        (Tlist_c *head);
     void    (*init)        (Tlist_c *head);
-    void    (*push_back)   (Tlist_ac *head,Tvalue value);
-    void    (*push_front)  (Tlist_ac *head,Tvalue value);
-    int     (*insert)      (Tlist_ac *head,size_t pos,Tvalue value);
+    void    (*push_back)   (Tlist_ac *head,const Tvalue value);
+    void    (*push_front)  (Tlist_ac *head,const Tvalue value);
+    int     (*insert)      (Tlist_ac *head,size_t pos,const Tvalue value);
     void    (*pop_back)    (Tlist_ac *head);
     void    (*pop_front)   (Tlist_ac *head);
     int     (*erase)       (Tlist_ac *head,size_t pos);
     void    (*clear)       (Tlist_ac *head);
-    size_t  (*size)        (Tlist_ac *head);
+//    size_t  (*size)        (Tlist_ac *head);
+    size_t  size;
     Tlist_c *head; //链表
 };
 
@@ -46,12 +327,12 @@ struct Tlist_ac
 static void list_init(Tlist_c *head)
 {
     if(head == NULL) return;
-    head->size = 0;
+//    head->size = 0;
     head->prev = NULL;
     head->next = NULL;
 }
 
-static void list_push_back(Tlist_ac *ls,Tvalue value)
+static void list_push_back(Tlist_ac *ls,const Tvalue value)
 {
     //分配空间
     if(ls->head == NULL) return;
@@ -59,7 +340,7 @@ static void list_push_back(Tlist_ac *ls,Tvalue value)
     list_init(new_value);
 
     //连接到头节点
-    if(ls->head->size == 0)
+    if(ls->size == 0)
     {
         //1.头节点的前后指针,指到新节点
         //2.新节点前指针,指到头节点
@@ -76,11 +357,11 @@ static void list_push_back(Tlist_ac *ls,Tvalue value)
         ls->head->prev->next = new_value;
         ls->head->prev = new_value;
     }
-    ls->head->size += 1;                //计数
-    ls->alloc(new_value,value);         //赋值
+    ls->size += 1;              //计数
+    ls->alloc(new_value,value); //赋值
 }
 
-static void list_push_front(Tlist_ac *ls,Tvalue value)
+static void list_push_front(Tlist_ac *ls,const Tvalue value)
 {
     //分配空间
     if(ls->head == NULL) return;
@@ -88,7 +369,7 @@ static void list_push_front(Tlist_ac *ls,Tvalue value)
     list_init(new_value);
 
     //连接到头节点
-    if(ls->head->size == 0)
+    if(ls->size == 0)
     {
         //参考: list_push_back
         ls->head->prev = new_value;
@@ -106,14 +387,14 @@ static void list_push_front(Tlist_ac *ls,Tvalue value)
         new_value->prev = ls->head;
         ls->head->next = new_value;
     }
-    ls->head->size += 1;                //计数
-    ls->alloc(new_value,value);         //赋值
+    ls->size += 1;              //计数
+    ls->alloc(new_value,value); //赋值
 }
 
-static int list_insert(Tlist_ac *ls,size_t pos,Tvalue value)
+static int list_insert(Tlist_ac *ls,size_t pos,const Tvalue value)
 {
     //分配空间
-    if(ls->head == NULL || pos >= ls->head->size) return 0;
+    if(ls->head == NULL || pos >= ls->size) return 0;
     Tlist_c *new_value = (Tlist_c *)malloc(sizeof(Tlist_c));
     list_init(new_value);
 
@@ -135,15 +416,15 @@ static int list_insert(Tlist_ac *ls,size_t pos,Tvalue value)
     it->prev->next = new_value;
     it->prev = new_value;
 
-    ls->head->size += 1;                //计数
-    ls->alloc(new_value,value);         //赋值
+    ls->size += 1;              //计数
+    ls->alloc(new_value,value); //赋值
     return 1;
 }
 
 static void list_pop_back(Tlist_ac *ls)
 {
-    if(ls->head == NULL || ls->head->size == 0) return ;
-    ls->head->size -= 1; //计数移除
+    if(ls->head == NULL || ls->size == 0) return ;
+    ls->size -= 1; //计数移除
 
     //1.保留尾节点
     //2.头节点的前指针,指向尾节点的前一个
@@ -159,12 +440,12 @@ static void list_pop_back(Tlist_ac *ls)
 
 static void list_pop_front(Tlist_ac *ls)
 {
-    if(ls->head == NULL || ls->head->size == 0) return ;
-    ls->head->size -= 1; //计数移除
+    if(ls->head == NULL || ls->size == 0) return ;
+    ls->size -= 1; //计数移除
 
     //最后一个节点
     Tlist_c *begin = NULL;
-    if(ls->head->size == 0)
+    if(ls->size == 0)
     {
         begin = ls->head->next;
         ls->head->next = NULL;
@@ -185,8 +466,8 @@ static void list_pop_front(Tlist_ac *ls)
 
 static int list_erase(Tlist_ac *ls,size_t pos)
 {
-    if(ls->head == NULL || ls->head->size == 0 || pos >= ls->head->size) return 0;
-    ls->head->size -= 1; //计数移除
+    if(ls->head == NULL || ls->size == 0 || pos >= ls->size) return 0;
+    ls->size -= 1; //计数移除
 
     //获取指定的当前节点
     size_t count = 0;
@@ -199,7 +480,7 @@ static int list_erase(Tlist_ac *ls,size_t pos)
 
     //删除末尾节点和最后一个元素时,需要特殊处理,避免操作空指针
     Tlist_c *now = NULL;
-    if(pos == ls->head->size || ls->head->size == 0)
+    if(pos == ls->size || ls->size == 0)
     {
         //1.保留当前节点
         //2.前一个节点的后指针,指向空(新尾节点)
@@ -237,17 +518,17 @@ static void list_clear(Tlist_ac *ls)
         ls->free(begin);
         free(begin);
     }
-    ls->head->size = 0; //清空计数
+    ls->size = 0; //清空计数
 }
 
 static size_t list_size(Tlist_ac *ls)
 {
     if(ls->head == NULL) return 0;
-    return ls->head->size;
+    return ls->size;
 }
 
 //启动链表
-static Tlist_ac* Tlist_open(void (*alloc)(Tlist_c *head,Tvalue value),void (*free)(Tlist_c *head))
+static Tlist_ac* Tlist_open(void (*alloc)(Tlist_c *head,const Tvalue value),void (*free)(Tlist_c *head))
 {
     //分配自身内存和链表的头节点链表
     Tlist_ac *ls = (Tlist_ac *)malloc(sizeof(Tlist_ac));
@@ -266,9 +547,10 @@ static Tlist_ac* Tlist_open(void (*alloc)(Tlist_c *head,Tvalue value),void (*fre
     ls->pop_front   = list_pop_front;
     ls->erase       = list_erase;
     ls->clear       = list_clear;
-    ls->size        = list_size;
 
-    ls->init(ls->head);//初始化链表
+    //初始化链表
+    ls->size = 0;
+    ls->init(ls->head);
     return ls;
 }
 
@@ -282,7 +564,7 @@ static void Tlist_close(Tlist_ac *ls)
 
 //== 默认分配器 ==
 //字符串
-static void list_malloc_Tcharp(Tlist_c *head,char* value)
+static void list_malloc_Tcharp(Tlist_c *head,const char* value)
 {
     head->value = (char*)malloc(strlen(value) +1);
     strncpy(head->value,value,strlen(value));
@@ -291,7 +573,7 @@ static void list_malloc_Tcharp(Tlist_c *head,char* value)
 static void list_free_Tcharp(Tlist_c *head)
 { free(head->value); }
 
-//基本类型
+////基本类型
 //static void list_malloc_Tbase(Tlist_c *head,Tvalue value)
 //{ head->value = value; }
 //static void list_free_Tbase(Tlist_c *head)
@@ -300,6 +582,6 @@ static void list_free_Tcharp(Tlist_c *head)
 
 
 //===== Tlien_c =====
-
+#endif
 
 #endif // TLINE_AC_H
