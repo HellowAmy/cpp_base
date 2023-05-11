@@ -12,6 +12,7 @@ SOURCES += \
 
 HEADERS += \
     Tlien_c.h \
+    Tline_ac.h \
     ctimel.h \
     map_th.h \
     queue_th.h \
