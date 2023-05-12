@@ -1,25 +1,19 @@
 #ifndef TLINE_AC_H
 #define TLINE_AC_H
 
+#if 0
 
-
-
-
-
-
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-//#define Tlist_create(Tapi,Tvalue)
+//未使用变量警告去除
+#define Tun(x) (void)(x)
 
+//链表遍历宏
+#define Tfor_each(it,Tapi)  \
+    for(Tls_##Tapi *it = ls->head->next;it!=NULL;it=it->next)
 
-
-
-//#define Tvalue char *
-//#define Tlist_for(head,it,Tapi) for(Tlist_##Tapi *it = head.next;it != NULL;it = it->next)
-//#define Tlist_for_p(head,it,Tapi) for(Tlist_##Tapi *it = head->next;it != NULL;it = it->next)
-
+//定义函数代码生成宏
 #define Tlist_Tbuild(Tapi,Tvalue)                                                                   \
 typedef struct Tls_##Tapi Tls_##Tapi;                                                               \
 struct Tls_##Tapi                                                                                   \
@@ -46,6 +40,7 @@ struct Tlist_##Tapi                                                             
     Tls_##Tapi *head;                                                                               \
 };                                                                                                  \
                                                                                                     \
+__attribute__((unused))                                                                             \
 static void list_init_##Tapi(Tls_##Tapi *head)                                                      \
 {                                                                                                   \
     if(head == NULL) return;                                                                        \
@@ -53,6 +48,7 @@ static void list_init_##Tapi(Tls_##Tapi *head)                                  
     head->next = NULL;                                                                              \
 }                                                                                                   \
                                                                                                     \
+__attribute__((unused))                                                                             \
 static void list_push_back_##Tapi(Tlist_##Tapi *ls,const Tvalue value)                              \
 {                                                                                                   \
     if(ls->head == NULL) return;                                                                    \
@@ -75,6 +71,7 @@ static void list_push_back_##Tapi(Tlist_##Tapi *ls,const Tvalue value)          
     ls->alloc(new_value,value);                                                                     \
 }                                                                                                   \
                                                                                                     \
+__attribute__((unused))                                                                             \
 static void list_push_front_##Tapi(Tlist_##Tapi *ls,const Tvalue value)                             \
 {                                                                                                   \
     if(ls->head == NULL) return;                                                                    \
@@ -98,6 +95,7 @@ static void list_push_front_##Tapi(Tlist_##Tapi *ls,const Tvalue value)         
     ls->alloc(new_value,value);                                                                     \
 }                                                                                                   \
                                                                                                     \
+__attribute__((unused))                                                                             \
 static int list_insert_##Tapi(Tlist_##Tapi *ls,size_t pos,const Tvalue value)                       \
 {                                                                                                   \
     if(ls->head == NULL || pos >= ls->size) return 0;                                               \
@@ -122,6 +120,7 @@ static int list_insert_##Tapi(Tlist_##Tapi *ls,size_t pos,const Tvalue value)   
     return 1;                                                                                       \
 }                                                                                                   \
                                                                                                     \
+__attribute__((unused))                                                                             \
 static void list_pop_back_##Tapi(Tlist_##Tapi *ls)                                                  \
 {                                                                                                   \
     if(ls->head == NULL || ls->size == 0) return ;                                                  \
@@ -134,6 +133,7 @@ static void list_pop_back_##Tapi(Tlist_##Tapi *ls)                              
     free(end);                                                                                      \
 }                                                                                                   \
                                                                                                     \
+__attribute__((unused))                                                                             \
 static void list_pop_front_##Tapi(Tlist_##Tapi *ls)                                                 \
 {                                                                                                   \
     if(ls->head == NULL || ls->size == 0) return ;                                                  \
@@ -155,6 +155,7 @@ static void list_pop_front_##Tapi(Tlist_##Tapi *ls)                             
     free(begin);                                                                                    \
 }                                                                                                   \
                                                                                                     \
+__attribute__((unused))                                                                             \
 static int list_erase_##Tapi(Tlist_##Tapi *ls,size_t pos)                                           \
 {                                                                                                   \
     if(ls->head == NULL || ls->size == 0 || pos >= ls->size) return 0;                              \
@@ -187,6 +188,7 @@ static int list_erase_##Tapi(Tlist_##Tapi *ls,size_t pos)                       
     return 1;                                                                                       \
 }                                                                                                   \
                                                                                                     \
+__attribute__((unused))                                                                             \
 static void list_clear_##Tapi(Tlist_##Tapi *ls)                                                     \
 {                                                                                                   \
     if(ls->head == NULL) return;                                                                    \
@@ -201,6 +203,7 @@ static void list_clear_##Tapi(Tlist_##Tapi *ls)                                 
     ls->size = 0;                                                                                   \
 }                                                                                                   \
                                                                                                     \
+__attribute__((unused))                                                                             \
 static Tlist_##Tapi* Topen_##Tapi                                                                   \
     (void (*alloc)(Tls_##Tapi *head,const Tvalue value),                                            \
      void (*free)(Tls_##Tapi *head))                                                                \
@@ -224,6 +227,7 @@ static Tlist_##Tapi* Topen_##Tapi                                               
     return ls;                                                                                      \
 }                                                                                                   \
                                                                                                     \
+__attribute__((unused))                                                                             \
 static void Tclose_##Tapi(Tlist_##Tapi *ls)                                                         \
 {                                                                                                   \
     ls->clear(ls);                                                                                  \
@@ -232,23 +236,22 @@ static void Tclose_##Tapi(Tlist_##Tapi *ls)                                     
 }
 
 //定义生成浅拷贝分配器
-#define Tac_Tdefault(Tapi,Tvalue)                                               \
-static void Tmalloc_##Tapi(Tls_##Tapi *head,Tvalue value)                       \
-{ head->value = value; }                                                        \
-static void Tfree_##Tapi(Tls_##Tapi *head)                                      \
-{ }                                                                             \
+#define Tac_Tdefault(Tapi,Tvalue)                                                                       \
+__attribute__((unused)) static void Tmalloc_##Tapi(Tls_##Tapi *head,const Tvalue value)                 \
+{ head->value = (Tvalue)value; }                                                                        \
+__attribute__((unused)) static void Tfree_##Tapi(Tls_##Tapi *head)                                      \
+{ Tun(head); }                                                                                          \
 
 //定义生成字符串分配器
-#define Tac_Tcharp(Tapi)                                                        \
-static void Tmalloc_Tcharp(Tls_##Tapi *head,const char* value)                  \
-{                                                                               \
-    head->value = (char*)malloc(strlen(value) +1);                              \
-    strncpy(head->value,value,strlen(value));                                   \
-    head->value[strlen(value)] = '\0';                                          \
-}                                                                               \
-static void Tfree_Tcharp(Tls_##Tapi *head)                                      \
-{ free(head->value); }                                                          \
-
+#define Tac_Tcharp(Tapi)                                                                                \
+__attribute__((unused)) static void Tmalloc_Tcharp(Tls_##Tapi *head,const char* value)                  \
+{                                                                                                       \
+    head->value = (char*)malloc(strlen(value) +1);                                                      \
+    strncpy(head->value,value,strlen(value));                                                           \
+    head->value[strlen(value)] = '\0';                                                                  \
+}                                                                                                       \
+__attribute__((unused)) static void Tfree_Tcharp(Tls_##Tapi *head)                                      \
+{ free(head->value); }                                                                                  \
 
 
 //== 定义生成对应类型代码 + 浅拷贝分配器 ==
@@ -275,17 +278,18 @@ Tls_Tcharp()
 //===== 最终代码生成 =====
 
 
+#endif
 
-//（1）整数类型：byte、short、int、long
-//（2）小数类型：float、double
-//（3）字符类型：char
-//（4）布尔类型：boolean
+//== 测试代码 ==
+//!
+//! 测试参考代码
+//!
+#if 1
 
-//#define Tlist_Tmake(Tapi,Tvalue) \
-//    Tlist_Tbuild(Tint,##Tvalue)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-
-#if 0
 #define Tlist_for(it,head) for(Tlist_c *it = head.next;it != NULL;it = it->next)
 #define Tlist_for_p(it,head) for(Tlist_c *it = head->next;it != NULL;it = it->next)
 
@@ -318,6 +322,7 @@ struct Tlist_ac
     void    (*pop_front)   (Tlist_ac *head);
     int     (*erase)       (Tlist_ac *head,size_t pos);
     void    (*clear)       (Tlist_ac *head);
+//    Tlist_ac (*clone)      (Tlist_ac *head);
 //    size_t  (*size)        (Tlist_ac *head);
     size_t  size;
     Tlist_c *head; //链表
@@ -521,11 +526,6 @@ static void list_clear(Tlist_ac *ls)
     ls->size = 0; //清空计数
 }
 
-static size_t list_size(Tlist_ac *ls)
-{
-    if(ls->head == NULL) return 0;
-    return ls->size;
-}
 
 //启动链表
 static Tlist_ac* Tlist_open(void (*alloc)(Tlist_c *head,const Tvalue value),void (*free)(Tlist_c *head))
@@ -547,6 +547,7 @@ static Tlist_ac* Tlist_open(void (*alloc)(Tlist_c *head,const Tvalue value),void
     ls->pop_front   = list_pop_front;
     ls->erase       = list_erase;
     ls->clear       = list_clear;
+    ls->clear       = list_clear;
 
     //初始化链表
     ls->size = 0;
@@ -561,6 +562,20 @@ static void Tlist_close(Tlist_ac *ls)
     free(ls->head); //清空头节点
     free(ls);       //清空操作结构体
 }
+
+//克隆链表
+static Tlist_ac* Tlist_clone(Tlist_ac *ls)
+{
+    if(ls == NULL) return NULL;
+    Tlist_ac *ls_new = Tlist_open(ls->alloc,ls->free);
+
+    for(Tlist_c *it = ls->head->next;it!=NULL;it=it->next)
+    {
+        ls_new->push_back(ls_new,it->value);
+    }
+    return ls_new;
+}
+
 
 //== 默认分配器 ==
 //字符串
