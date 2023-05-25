@@ -8,5 +8,6 @@ SOURCES += \
         main_split.c \
 
 HEADERS += \
+    qt_butt_tree.h \
     scan_files.h \
     str_split.h
