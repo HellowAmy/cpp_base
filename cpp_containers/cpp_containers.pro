@@ -4,8 +4,9 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        index_containers.cpp \
+    channel_containers.cpp \
+#        index_containers.cpp \
 #        linear_array.cpp \
-        main.cpp
+#        main.cpp
 
 
