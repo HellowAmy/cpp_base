@@ -4,5 +4,9 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        chain_responsibility.cpp \
-        main.cpp
+#        chain_responsibility.cpp \
+        main.cpp \
+        singleton.cpp
+
+HEADERS += \
+    Tsingle.h
