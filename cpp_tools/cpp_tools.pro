@@ -7,14 +7,16 @@ SOURCES += \
         ctimel.cpp \
 #        main.cpp \
 #        main.c \
-        main_Tlist.c \
+#        main_Tlist.c \
 #    main_Tlist_test.c \
-#        stm.cpp
+ #        stm.cpp
+    main_Tvlog.cpp
 
 HEADERS += \
     Tlien_c.h \
     Tline_ac.h \
     Tlist_Tapi.h \
+    Tvlog.h \
     ctimel.h \
     map_th.h \
     queue_th.h \
