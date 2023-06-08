@@ -4,13 +4,14 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        ctimel.cpp \
-#        main.cpp \
+#        ctimel.cpp \
+        main.cpp \
 #        main.c \
 #        main_Tlist.c \
-#    main_Tlist_test.c \
- #        stm.cpp
-    main_Tvlog.cpp
+#        main_Tlist_test.c \
+#        stm.cpp \
+#        main_Tvlog.cpp \
+#        main_th.cpp \
 
 HEADERS += \
     Tlien_c.h \

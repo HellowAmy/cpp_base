@@ -1,8 +1,5 @@
 #include "ctimel.h"
-#include "stm.h"
-#include "queue_th.h"
-#include "vector_th.h"
-#include "map_th.h"
+#include "../include/stm.h"
 
 #include <queue>
 #include <vector>
@@ -51,34 +48,92 @@ void test_1()
 {
     cout<<"===== test_1 ====="<<endl;
 
+    auto func = [](){
+        for(int i=0;i<10000;i++)
+            for(int i=0;i<10000;i++){}
+    };
+
     //创建临时区域，等待退出时打印
     {
+        cout<<"===== 一次计算 ====="<<endl;
         ctimel tm;
         func();
     }
+    {
+        cout<<"===== 更新时间 ====="<<endl;
+        ctimel tm;
 
-    ctimel tm;
-    func();
-    func();
-    tm.show();
+        func();
+        tm.show();
+        tm.update();
 
-    //更新时间为现在的时间点
-    cout<<"== update =="<<endl;
-    tm.update();
-    func();
-    tm.show();
+        func();
+        tm.show();
+        tm.update();
 
+        func();
+        tm.show();
+        tm.update();
+    }
+    {
+        cout<<"===== 保存时间点等待未来打印 ====="<<endl;
+        ctimel tm;
 
-    cout<<"== ctimes =="<<endl;
-    ctimes ct;
-    cout<<ct.to_now()<<endl;
-    cout<<ct.to_now("%H:%M:%S")<<endl;
+        func();
+        auto s1 = tm.to_point();
 
-    //保留时间点并在未来打印
-    time_t t1 = ct.time_now();
-    cout<<ct.to_format(t1)<<endl;
+        func();
+        auto s2 = tm.to_point();
 
-    cout<<"===== test_1 ====="<<endl;
+        cout<<"paint: "<<tm.to_string(s1)<<endl;
+        cout<<"paint: "<<tm.to_string(s2)<<endl;
+    }
+    {
+        cout<<"===== 多点时间测试 ====="<<endl;
+        ctimel tm;
+
+        func();
+        tm.add_point();
+
+        func();
+        tm.add_point();
+
+        func();
+        tm.add_point();
+
+        func();
+        tm.add_point();
+
+        tm.show_vec();
+    }
+    {
+        cout<<"===== 多点时间测试并每次重新计时 ====="<<endl;
+        ctimel tm;
+
+        func();
+        tm.add_point_re();
+
+        func();
+        tm.add_point_re();
+
+        func();
+        tm.add_point_re();
+
+        func();
+        tm.add_point_re();
+
+        tm.show_vec();
+    }
+    {
+        cout<<"===== 人类可视化时间:ctimes ====="<<endl;
+        ctimes ct;
+        cout<<ct.to_now()<<endl;
+        cout<<ct.to_now("%H:%M:%S")<<endl; //自定义打印格式
+
+        //保留时间点并在未来打印
+        time_t t1 = ct.time_now();
+        cout<<ct.to_format(t1)<<endl;
+    }
 }
 
 void test_2()
@@ -124,290 +179,12 @@ void test_2()
     cout<<"===== stmv =====\n"<<endl;
 }
 
-
-void test_3()
-{
-    //基本类型操作测试
-    cout<<endl<<"===== queue_th ====="<<endl;
-    queue_th<int> thq1;
-    thq1.push(11);
-    thq1.push(12);
-    thq1.push(13);
-    thq1.push(14);
-    thq1.push(15);
-
-    queue_th<int> thq2(thq1);
-    queue_th<int> thq3;
-    thq3 = std::move(thq2);
-
-    cout<<"====="<<endl;
-    while(thq3.empty() == false)
-    {
-        cout<<thq3.front()<<endl;
-        thq3.pop();
-    }
-
-    //类操作测试
-    queue_th<string> th1;
-    th1.push("s11");
-    th1.push("s22");
-    th1.push("s33");
-    th1.push("s44");
-    string s55 = "s55";
-    th1.push(s55);
-    th1.emplace("s66");
-    string s77 = "s77";
-    th1.emplace(s77);
-
-    queue_th<string> th2(std::move(th1));
-    queue_th<string> th3;
-    th3 = th2;
-
-    cout<<"====="<<endl;
-    while(th2.size() > 0)
-    {
-        cout<<th2.front()<<endl;
-        th2.pop();
-    }
-
-    //多线程测试
-    cout<<"====="<<endl;
-    queue_th<string> queue_th_1;
-    auto func_th = [&](){
-        for(int i=0;i<100;i++)
-        {
-            string str = "pp: " + to_string(i);
-            queue_th_1.push(str);
-            queue_th_1.push(std::move(str));
-        }
-    };
-
-    thread thread_1(func_th);
-    thread thread_2(func_th);
-    thread thread_3(func_th);
-    thread_1.join();
-    thread_2.join();
-    thread_3.join();
-    cout<<queue_th_1.size()<<endl;
-
-    //容器赋值与交换测试
-    queue_th<string> queue_th_2(queue_th_1);
-    queue_th<string> queue_th_3;
-    queue_th_3 = queue_th_1;
-
-    queue_th<string> queue_th_tm(queue_th_1);
-    queue_th<string> queue_th_4(std::move(queue_th_tm));
-
-    cout<<"====="<<endl;
-    cout<<queue_th_2.size()<<endl;
-    cout<<queue_th_3.size()<<endl;
-    cout<<queue_th_4.size()<<endl;
-
-    queue_th<string> queue_th_null;
-    cout<<"swap front: "<<queue_th_null.size()<<endl;
-
-    queue_th_null.swap(queue_th_4);
-    cout<<"swap after: "<<queue_th_null.size()<<endl;
-}
-
-void test_4()
-{
-    cout<<endl<<"===== vector_th ====="<<endl;
-    vector_th<string> v1;
-    v1.push_back("v1");
-    v1.push_back("v2");
-    string vv3 = "v3";
-    v1.push_back(vv3);
-    string vv4 = "v4";
-    v1.push_back(std::move(vv4));
-    v1.emplace_back("v5");
-
-    vector_th<string> v2(v1);
-    vector_th<string> vtm(v1);
-    vector_th<string> v3(std::move(vtm));
-
-    cout<<v1.size()<<endl;
-    cout<<v2.size()<<endl;
-    cout<<v3.size()<<endl;
-
-    cout<<"====="<<endl;
-    for(auto a:v2)
-    {
-        cout<<a<<endl;
-    }
-
-    cout<<"====="<<endl;
-    for(auto it = v3.begin();it!=v3.end();it++)
-    {
-        cout<<*it<<endl;
-    }
-
-    cout<<"====="<<endl;
-    cout<<v3.at(2)<<endl;
-    cout<<v3[3]<<endl;
-
-    cout<<"====="<<endl;
-    v1.emplace(v1.begin(),"v0");
-    cout<<"capacity: "<<v1.capacity()<<endl;
-    cout<<"size: "<<v1.size()<<endl;
-
-    cout<<"====="<<endl;
-    for(auto it = v1.begin();it!=v1.end();it++)
-    {
-        cout<<*it<<endl;
-    }
-
-    cout<<"====="<<endl;
-    vector_th<int> veci1;
-    auto func_th = [&](){
-        for(int i=0;i<10000;i++)
-        {
-            veci1.push_back(i);
-        }
-    };
-
-    thread thread_1(func_th);
-    thread thread_2(func_th);
-    thread thread_3(func_th);
-    thread_1.join();
-    thread_2.join();
-    thread_3.join();
-    cout<<veci1.size()<<endl;
-}
-
-void test_5()
-{
-    cout<<endl<<"===== map_th ====="<<endl;
-    int v2=20;
-    int v3=30;
-    int v5=50;
-    int v6=60;
-
-    //插入测试
-    map_th<int,int> mm1;
-    mm1.insert(pair<int,int>(1,10));
-    mm1.insert(pair<int,int>(2,v2));
-    mm1.insert(pair<int,int>(3,std::move(v3)));
-    mm1.emplace(4,40);
-    mm1.emplace(5,v5);
-    mm1.emplace(6,std::move(v6));
-    mm1.emplace_hint(mm1.begin(),pair<int,int>(7,70));
-
-    for(const auto &a : mm1)
-    {
-        cout<<a.first<<"|"<<a.second<<endl;
-    }
-    cout<<mm1.size()<<endl;
-
-    //赋值测试
-    map_th<int,int> mm2(mm1);
-    map_th<int,int> mm3(std::move(mm1));
-
-    cout<<mm2.size()<<endl;
-    cout<<mm3.size()<<endl;
-    cout<<mm1.size()<<endl;
-
-    auto it = mm2.begin();
-    for(int i=0;i<3;i++) it++;
-    mm2.erase(mm2.begin(),it);
-    cout<<mm2.size()<<endl;
-
-    //多线程测试
-    map_th<int,string> ms1;
-    ms1.emplace(11,"ss1");
-    ms1.emplace(12,"ss2");
-    ms1.emplace(13,"ss3");
-    ms1.emplace(14,"ss4");
-
-    atomic<int> count {0};
-    auto func = [&](){
-        for(int i=100;i<1000;i++)
-        {
-            count++;
-            ms1.emplace(i,"push");
-        }
-    };
-
-    thread t1(func);
-    thread t2(func);
-    thread t3(func);
-    t1.join();
-    t2.join();
-    t3.join();
-
-    cout<<ms1.size()<<endl;
-    cout<<count<<endl;
-}
-
-#include <unistd.h>
-void test_6()
-{
-    //迭代器易位测试
-    cout<<endl<<"== 迭代器易位测试 =="<<endl;
-    vector_th<string> v1;
-    v1.reserve(10);
-    v1.push_back("word_1");
-    v1.push_back("word_2");
-    v1.push_back("word_3");
-
-    //初始化的数据量
-    cout<<v1.capacity()<<"|"<<v1.size()<<endl;
-
-    //拿到迭代器,延时时候使用(模拟多线程下被时间切片打断操作)
-    auto func1 = [&](){
-        auto it1 = v1.begin();
-        cout<<"对比点: "<<*it1<<endl;
-        sleep(1);   //延时使得多线程下一定被其他线程插入操作
-        it1++;
-        cout<<"对比点: "<<*it1<<endl; //多线程操作迭代器之后,迭代器易位,打印非法数据
-    };
-
-    //往容器添加数据(模拟多线程下迭代器失效)
-    auto func2 = [&](){
-        v1.insert(v1.begin()+1,"add word"); //其他线程插入操作
-    };
-
-    cout<<"单线程操作迭代器"<<endl;
-    func1();
-    func2();
-
-    cout<<"===== show ====="<<endl;
-    for(auto a:v1)
-    {
-        cout<<a<<endl;
-    }
-
-    v1.clear();
-    v1.reserve(10);
-    v1.push_back("word_1");
-    v1.push_back("word_2");
-    v1.push_back("word_3");
-
-    cout<<endl<<"多线程操作迭代器"<<endl;
-    thread th1(func1);
-    thread th2(func2);
-    th1.join();
-    th2.join();
-
-    cout<<"===== show ====="<<endl;
-    for(auto a:v1)
-    {
-        cout<<a<<endl;
-    }
-
-    //多线程添加数据之后的数据量
-    cout<<v1.capacity()<<"|"<<v1.size()<<endl;
-}
-
 int main()
 {
     cout<<"===== begin ====="<<endl;
-//    test_1();
+    test_1();
 //    test_2();
-    test_3();
-    test_4();
-    test_5();
-    test_6();
+
     cout<<"===== end ====="<<endl;
     return 0;
 }
@@ -513,4 +290,40 @@ word_3
 10|4
 ===== end =====
 
+*/
+
+
+/*
+ * 计算函数时间测试结果：
+ *
+===== begin =====
+===== test_1 =====
+===== 一次计算 =====
+[nan: 288974927|mic: 288974|mil: 288|sec: 0]
+===== 更新时间 =====
+[nan: 291067824|mic: 291067|mil: 291|sec: 0]
+[nan: 287929075|mic: 287929|mil: 287|sec: 0]
+[nan: 287614887|mic: 287614|mil: 287|sec: 0]
+[nan: 866809334|mic: 866809|mil: 866|sec: 0]
+===== 保存时间点等待未来打印 =====
+paint: [nan: 288384552|mic: 288384|mil: 288|sec: 0]
+paint: [nan: 576289512|mic: 576289|mil: 576|sec: 0]
+[nan: 576362262|mic: 576362|mil: 576|sec: 0]
+===== 多点时间测试 =====
+[nan: 304235552|mic: 304235|mil: 304|sec: 0]
+[nan: 591549148|mic: 591549|mil: 591|sec: 0]
+[nan: 878842238|mic: 878842|mil: 878|sec: 0]
+[nan: 1166150134|mic: 1166150|mil: 1166|sec: 1]
+[nan: 1166241424|mic: 1166241|mil: 1166|sec: 1]
+===== 多点时间测试并每次重新计时 =====
+[nan: 287540339|mic: 287540|mil: 287|sec: 0]
+[nan: 286082889|mic: 286082|mil: 286|sec: 0]
+[nan: 286608348|mic: 286608|mil: 286|sec: 0]
+[nan: 286342874|mic: 286342|mil: 286|sec: 0]
+[nan: 1146695529|mic: 1146695|mil: 1146|sec: 1]
+===== 人类可视化时间:ctimes =====
+2023-06-08 21:01:01
+21:01:01
+2023-06-08 21:01:01
+===== end =====
 */

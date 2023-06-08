@@ -33,7 +33,7 @@
 //!
 #define VLOG_COLOR  //需要在Tvlog.h文件之前使用
 //#define VLOG_CLOSE  //需要在Tvlog.h文件之前使用
-#include "Tvlog.h"
+#include "../include/Tvlog.h"
 #include <vector>
 #include <list>
 using namespace std;
