@@ -41,7 +41,7 @@
 //!         文章的测试代码直接运行，会导致打印内容混乱，
 //!         最后的测试结果已经归纳好了单个test函数的输出结果
 //!
-#include "Tsingle.h"
+#include "../include/Tsingle.h"
 #include <iostream>
 #include <mutex>
 #include <vector>

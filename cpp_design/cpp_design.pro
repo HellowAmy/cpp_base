@@ -5,7 +5,6 @@ CONFIG -= qt
 
 SOURCES += \
 #        chain_responsibility.cpp \
-        main.cpp \
         singleton.cpp
 
 HEADERS += \
