@@ -64,7 +64,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Tlist_Tapi.h"
+#include "../include/Tlist_Tapi.h"
 
 //== 自定义类型:自定义内存分配:注意生成顺序 (类型定义 -> 宏代码生成 -> 自定义分配器) ==
 typedef struct meg meg;

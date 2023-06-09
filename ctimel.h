@@ -1,3 +1,6 @@
+//!
+//! ctimel.h
+//!
 #ifndef CTIMEL_H
 #define CTIMEL_H
 
@@ -66,10 +69,11 @@ public:
     inline void add_point_re() { _vec.push_back(to_point()); update(); }
 
 protected:
-    time_point<steady_clock,nanoseconds> _begin;
-    time_point<steady_clock,nanoseconds> _pass;
-    std::vector<nanoseconds> _vec;
+    time_point<steady_clock,nanoseconds> _begin;    //用于计算上一个时间点
+    time_point<steady_clock,nanoseconds> _pass;     //计算生存时间，析构时打印
+    std::vector<nanoseconds> _vec;                  //多点打印记录
 };
+
 
 //!
 //! 功能：显示可视化的时间
@@ -78,7 +82,7 @@ class ctimes
 {
 public:
     //现在的时间点-可视化
-    std::string to_now(const std::string &format = "%Y-%m-%d %H:%M:%S")//
+    std::string to_now(const std::string &format = "%Y-%m-%d %H:%M:%S")
     {
         char ret[64];
         time_t t = system_clock::to_time_t(system_clock::now());
@@ -94,7 +98,9 @@ public:
         strftime(ret,sizeof(ret),format.c_str(),localtime(&t));
         return ret;
     }
-    time_t time_now(){ time_t t; return time(&t); };
+
+    time_t time_now(){ time_t t; return time(&t); }; //当前时间
 };
+//===== ctimel =====
 
 #endif // CTIMEL_H
