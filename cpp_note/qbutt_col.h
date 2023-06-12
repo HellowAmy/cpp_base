@@ -1,3 +1,6 @@
+//!
+//! qbutt_col.h
+//!
 #ifndef QBUTT_COL_H
 #define QBUTT_COL_H
 

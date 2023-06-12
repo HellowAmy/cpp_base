@@ -1,3 +1,6 @@
+//!
+//! qbutt_col.cpp
+//!
 #include "qbutt_col.h"
 
 qbutt_col::qbutt_col(QWidget *parent) : QWidget(parent)
