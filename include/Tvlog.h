@@ -163,8 +163,9 @@ private:
 };
 //== 文件日志模板 ==
 
-typedef Tsingle_d<Tflog<level4::level>> Tsflog;
-typedef Tsingle_d<Tvlog<level4::level>> Tsvlog;
+typedef level4::level vlevel4;
+typedef Tsingle_d<Tflog<vlevel4>> Tflogs;
+typedef Tsingle_d<Tvlog<vlevel4>> Tvlogs;
 
 //颜色打印--注释掉则无颜色
 //#define VLOG_COLOR
@@ -176,7 +177,7 @@ typedef Tsingle_d<Tvlog<level4::level>> Tsvlog;
 //== 功能宏 ==
 //快速打印变量值
 //参数：打印的值
-#define $1(value) "["#value": "<<value<<"] "
+#define $(value) "["#value": "<<value<<"] "
 //== 功能宏 ==
 
 
@@ -184,33 +185,33 @@ typedef Tsingle_d<Tvlog<level4::level>> Tsvlog;
 #define VMAKE_LOG(txt,type,...)                                             \
     *Tsvlog::get()<<type                                                    \
     <<txt "["<<__FILE__<<":<"<<__LINE__<<">] <<<< "                         \
-    <<__VA_ARGS__<<endl                                                     \
+    <<__VA_ARGS__<<std::endl                                                \
 
 #define VMAKE_LOG_COL(txt,type,...)                                         \
-    *Tsvlog::get()<<type                                                    \
+    *Tvlogs::get()<<type                                                    \
     <<txt "["<<__FILE__<<":<"<<__LINE__<<">] <<<< "                         \
-    <<__VA_ARGS__<<"\033[0m"<<endl                                          \
+    <<__VA_ARGS__<<"\033[0m"<<std::endl                                     \
 
 #define FMAKE_LOG(txt,type,...)                                             \
-    *Tsflog::get()<<type                                                    \
-    <<"["<<Tsflog::get()->date_time()<<"] "                                 \
+    *Tflogs::get()<<type                                                    \
+    <<"["<<Tflogs::get()->date_time()<<"] "                                 \
     <<txt " <<<< "<<__VA_ARGS__                                             \
-    <<" ["<<__FILE__<<":<"<<__LINE__<<">]"<<endl                            \
+    <<" ["<<__FILE__<<":<"<<__LINE__<<">]"<<std::endl                       \
 //== 打印工厂宏 ==
 
 
 //== 调试日志宏 ==
 #ifndef VLOG_CLOSE
     #ifndef VLOG_COLOR
-        #define vlogi(...) VMAKE_LOG("[Inf]",level4::level::e_info,__VA_ARGS__)
-        #define vlogd(...) VMAKE_LOG("[Deb]",level4::level::e_debug,__VA_ARGS__)
-        #define vlogw(...) VMAKE_LOG("[War]",level4::level::e_warning,__VA_ARGS__)
-        #define vloge(...) VMAKE_LOG("[Err]",level4::level::e_error,__VA_ARGS__)
+        #define vlogi(...) VMAKE_LOG("[Inf]",vlevel4::e_info,__VA_ARGS__)
+        #define vlogd(...) VMAKE_LOG("[Deb]",vlevel4::e_debug,__VA_ARGS__)
+        #define vlogw(...) VMAKE_LOG("[War]",vlevel4::e_warning,__VA_ARGS__)
+        #define vloge(...) VMAKE_LOG("[Err]",vlevel4::e_error,__VA_ARGS__)
     #else //== 颜色打印分界 ==
-        #define vlogi(...) VMAKE_LOG_COL("[Inf]",level4::level::e_info,__VA_ARGS__)
-        #define vlogd(...) VMAKE_LOG_COL("\033[32m[Deb]",level4::level::e_debug,__VA_ARGS__)
-        #define vlogw(...) VMAKE_LOG_COL("\033[33m[War]",level4::level::e_warning,__VA_ARGS__)
-        #define vloge(...) VMAKE_LOG_COL("\033[31m[Err]",level4::level::e_error,__VA_ARGS__)
+        #define vlogi(...) VMAKE_LOG_COL("[Inf]",vlevel4::e_info,__VA_ARGS__)
+        #define vlogd(...) VMAKE_LOG_COL("\033[32m[Deb]",vlevel4::e_debug,__VA_ARGS__)
+        #define vlogw(...) VMAKE_LOG_COL("\033[33m[War]",vlevel4::e_warning,__VA_ARGS__)
+        #define vloge(...) VMAKE_LOG_COL("\033[31m[Err]",vlevel4::e_error,__VA_ARGS__)
     #endif
 #else
     #define vlogi(...)
@@ -223,10 +224,10 @@ typedef Tsingle_d<Tvlog<level4::level>> Tsvlog;
 
 
 //== 文件日志宏 ==
-#define flogi(...) FMAKE_LOG("[Inf]",level4::level::e_info,__VA_ARGS__)
-#define flogd(...) FMAKE_LOG("[Deb]",level4::level::e_debug,__VA_ARGS__)
-#define flogw(...) FMAKE_LOG("[War]",level4::level::e_warning,__VA_ARGS__)
-#define floge(...) FMAKE_LOG("[Err]",level4::level::e_error,__VA_ARGS__)
+#define flogi(...) FMAKE_LOG("[Inf]",vlevel4::e_info,__VA_ARGS__)
+#define flogd(...) FMAKE_LOG("[Deb]",vlevel4::e_debug,__VA_ARGS__)
+#define flogw(...) FMAKE_LOG("[War]",vlevel4::e_warning,__VA_ARGS__)
+#define floge(...) FMAKE_LOG("[Err]",vlevel4::e_error,__VA_ARGS__)
 //== 文件日志宏 ==
 
 
@@ -305,78 +306,11 @@ void print_con(Tit begin,Tit end,int len,const std::string &flg)
 
 #ifndef VLOG_CLOSE
     //参数：$v的容器打印，$v的参数
-    #define vlogp(...)                                              \
-        std::cout<<"| ["<<__FILE__<<":<"<<__LINE__<<">]"<<endl;     \
+    #define vlogc(...)                                                  \
+        std::cout<<"| ["<<__FILE__<<":<"<<__LINE__<<">]"<<std::endl;    \
         print_con(__VA_ARGS__);
 #else
-    #define vlogp(...)
-#endif
-//== 容器打印格式 ==
-
-
-//== 容器打印格式 ==
-//参数：容器
-#define $v1(vec)                                        \
-{                                                       \
-    cout<<"===== "#vec":"<<vec.size()<<" ====="<<endl;  \
-    for(const auto &a:vec)                              \
-    {                                                   \
-        cout<<a<<" ";                                   \
-    }                                                   \
-    cout<<endl;                                         \
-    cout<<"===== ====="<<endl;                          \
-}                                                       \
-
-//参数：容器，换行数量
-#define $v2(vec,count)                                  \
-{                                                       \
-    cout<<"===== "#vec":"<<vec.size()<<" ====="<<endl;  \
-    size_t i=0;                                         \
-    for(const auto &a:vec)                              \
-    {                                                   \
-        cout<<"["<<a<<"] ";                             \
-        i++;                                            \
-        if(i%count == 0&&i!=vec.size()) cout<<endl;     \
-    }                                                   \
-    cout<<endl;                                         \
-    cout<<"===== ====="<<endl;                          \
-}                                                       \
-
-//参数：容器，开始迭代器，结束迭代器
-#define $v3(vec,begin,end)                              \
-{                                                       \
-    cout<<"===== "#vec":"<<vec.size()<<" ====="<<endl;  \
-    for(auto it=begin;it!=end;it++)                     \
-    {                                                   \
-        cout<<"["<<*it<<"] ";                           \
-    }                                                   \
-    cout<<endl;                                         \
-    cout<<"===== ====="<<endl;                          \
-}                                                       \
-
-//参数：容器，换行数量，左分割符，右分割符
-#define $v4(vec,count,left,right)                       \
-{                                                       \
-    cout<<"===== "#vec":"<<vec.size()<<" ====="<<endl;  \
-    size_t i=0;                                         \
-    for(const auto &a:vec)                              \
-    {                                                   \
-        cout<<left<<a<<right<<" ";                      \
-        i++;                                            \
-        if(i%count == 0&&i!=vec.size()) cout<<endl;     \
-    }                                                   \
-    cout<<endl;                                         \
-    cout<<"===== ====="<<endl;                          \
-}                                                       \
-
-#ifndef VLOG_CLOSE
-    //参数：$v的容器打印，$v的参数
-    #define vlogc(func,...)                                 \
-        *Tsvlog::get()<<level4::level::e_error              \
-        <<"[Con]["<<__FILE__<<":<"<<__LINE__<<">]"<<endl;   \
-        func(__VA_ARGS__)
-#else
-    #define vlogc(func,...)
+    #define vlogc(...)
 #endif
 //== 容器打印格式 ==
 

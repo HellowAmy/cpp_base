@@ -10,10 +10,10 @@ SOURCES += \
 #        main_Tlist.c \
 #        main_Tlist_test.c \
 #        stm.cpp \
-#        main_Tvlog.cpp \
+        main_Tvlog.cpp \
 #        main_th.cpp \
 #    main_ctime.cpp \
-    main_stm.cpp
+#    main_stm.cpp
 
 HEADERS += \
 #    ../include/ctimel.h \

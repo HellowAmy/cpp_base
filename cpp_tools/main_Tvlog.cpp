@@ -36,13 +36,13 @@
 #include "../include/Tvlog.h"
 #include <vector>
 #include <list>
-using namespace std;
-
-
 
 #include <chrono>
 #include <iostream>
-using namespace std;
+using std::string;
+using std::vector;
+using std::list;
+using std::to_string;
 using namespace std::chrono;
 
 //!
@@ -76,7 +76,7 @@ public:
         return str;
     }
 
-    inline void show_str(const string str) { cout<<str<<endl; }
+    inline void show_str(const string str) { std::cout<<str<<std::endl; }
     inline void show() { show_str(to_str()); }
     inline void update() { _begin = steady_clock::now(); }
 
@@ -87,7 +87,7 @@ protected:
 
 void test_1()
 {
-    Tsvlog::get()->set_level(level4::level::e_info);    //设置最低显示日志级别
+    Tvlogs::get()->set_level(vlevel4::e_info);    //设置最低显示日志级别
 
     //普通打印
     vloge("== 普通打印 ==");
@@ -96,7 +96,7 @@ void test_1()
     vlogd("10+20 ret: " << 10+20);
     vlogw("PI: "<<3.14);
     vloge("2^4 calculate: "<<2*2<<" * "<<2*2<<" = "<<4*4);
-    vloge("2^4 calculate:" $1(2*2) $1(2*2) "=" $1(4*4));
+    vloge("2^4 calculate:" $(2*2) $(2*2) "=" $(4*4));
 
     //快速打印结果
     vloge("== 快速打印 ==");
@@ -104,7 +104,7 @@ void test_1()
     for(int i=0;i<=100;i++) count += i;
     string str = "hello world";
     int ret = 10*60;
-    vlogd($1(str) $1(ret) $1(count));
+    vlogd($(str) $(ret) $(count));
 
     //容器快速打印
     vector<string> vec;
@@ -114,11 +114,6 @@ void test_1()
         vec.push_back("vec:"+to_string(i));
         ls.push_back("ls:"+to_string(i));
     }
-    vloge("== 容器打印--宏 ==");
-    vlogc($v1,ls);                              //打印容器
-    vlogc($v2,ls,4);                            //打印容器，带换行
-    vlogc($v3,vec,vec.begin()+2,vec.end()-2);   //打印容器，指定迭代器范围
-    vlogc($v4,vec,3,"[","]");                   //打印容器，制定分界符
 
     vloge("== 容器打印--模板 ==");
     {
@@ -127,11 +122,11 @@ void test_1()
         {
             vec.push_back(i);
         }
-        vlogp(vec);
-        vlogp(vec,5);
-        vlogp(vec,5,"][");
-        vlogp(vec.begin(),vec.end(),5);
-        vlogp(vec.begin(),vec.end(),5,".");
+        vlogc(vec);
+        vlogc(vec,5);
+        vlogc(vec,5,"][");
+        vlogc(vec.begin(),vec.end(),5);
+        vlogc(vec.begin(),vec.end(),5,".");
     }
 
     int ifor = 3;
@@ -141,14 +136,14 @@ void test_1()
         ctimel c;
         for(int i=0;i<ifor;i++)
         {
-            vlogd($1(i) "hellow world");
+            vlogd($(i) "hellow world");
         }
         string s1 = c.to_str();
         int value=100;
         string s = "hellow world";
         for(int i=0;i<ifor;i++)
         {
-            vlogd($1(i) $1(value) $1(s));
+            vlogd($(i) $(value) $(s));
         }
         string s2 = c.to_str();
     }
@@ -159,14 +154,14 @@ void test_1()
         ctimel c;
         for(int i=0;i<ifor;i++)
         {
-            cout<<i<<": hellow world"<<endl;
+            std::cout<<i<<": hellow world"<<std::endl;
         }
         string s1 = c.to_str();
         int value=100;
         string s = "hellow world";
         for(int i=0;i<ifor;i++)
         {
-            cout<<i<<": value:"<<value<<" | s:"<<s<<endl;
+            std::cout<<i<<": value:"<<value<<" | s:"<<s<<std::endl;
         }
         string s2 = c.to_str();
     }
@@ -194,10 +189,10 @@ void test_1()
 
 void test_2()
 {
-    Tsflog::get()->init("Tflog.log",false);             //设置日志文件和追加模式
-    Tsflog::get()->set_level(level4::level::e_debug);   //设置最低显示日志级别
-    Tsflog::get()->set_limit(5);                        //设置日志数量（启动循环覆盖）--不设置则默认无限制
-    Tsflog::get()->set_length(1024*1024*10);            //设置最大日志长度（10M）--不设置默认64M
+    Tflogs::get()->init("Tflog.log",false);     //设置日志文件和追加模式
+    Tflogs::get()->set_level(vlevel4::e_debug); //设置最低显示日志级别
+    Tflogs::get()->set_limit(5);                //设置日志数量（启动循环覆盖）--不设置则默认无限制
+    Tflogs::get()->set_length(1024*1024*10);    //设置最大日志长度（10M）--不设置默认64M
 
     //普通打印
     floge("== 普通打印 ==");
@@ -206,7 +201,7 @@ void test_2()
     flogd("10+20 ret: " << 10+20);
     flogw("PI: "<<3.14);
     floge("2^4 calculate: "<<2*2<<" * "<<2*2<<" = "<<4*4);
-    floge("2^4 calculate:" $1(2*2) $1(2*2) "=" $1(4*4));
+    floge("2^4 calculate:" $(2*2) $(2*2) "=" $(4*4));
 
     //快速打印结果
     floge("== 快速打印 ==");
@@ -214,7 +209,7 @@ void test_2()
     for(int i=0;i<=100;i++) count += i;
     string str = "hello world";
     int ret = 10*60;
-    flogd($1(str) $1(ret) $1(count));
+    flogd($(str) $(ret) $(count));
 
     int ifor = 3;
 
@@ -223,14 +218,14 @@ void test_2()
         ctimel c;
         for(int i=0;i<ifor;i++)
         {
-            flogw($1(i) "hellow world");
+            flogw($(i) "hellow world");
         }
         string s1 = c.to_str();
         int value=100;
         string s = "hellow world";
         for(int i=0;i<ifor;i++)
         {
-            flogw($1(i) $1(value) $1(s));
+            flogw($(i) $(value) $(s));
         }
         string s2 = c.to_str();
     }
@@ -241,8 +236,8 @@ int main()
 {
     printf("== begin ==\n");
 
-//    test_1();
-//    test_2();
+    test_1();
+    test_2();
 
     printf("== end ==\n");
     return 0;
@@ -326,28 +321,6 @@ int main()
 [Err][../cpp_tools/main_Tvlog.cpp:<101>] <<<< 2^4 calculate:[2*2: 4] [2*2: 4] =[4*4: 16]
 [Err][../cpp_tools/main_Tvlog.cpp:<104>] <<<< == 快速打印 ==
 [Deb][../cpp_tools/main_Tvlog.cpp:<109>] <<<< [str: hello world] [ret: 600] [count: 5050]
-[Err][../cpp_tools/main_Tvlog.cpp:<119>] <<<< == 容器打印--宏 ==
-[Con][../cpp_tools/main_Tvlog.cpp:<120>]
-===== ls:10 =====
-ls:0 ls:1 ls:2 ls:3 ls:4 ls:5 ls:6 ls:7 ls:8 ls:9
-===== =====
-[Con][../cpp_tools/main_Tvlog.cpp:<121>]
-===== ls:10 =====
-[ls:0] [ls:1] [ls:2] [ls:3]
-[ls:4] [ls:5] [ls:6] [ls:7]
-[ls:8] [ls:9]
-===== =====
-[Con][../cpp_tools/main_Tvlog.cpp:<122>]
-===== vec:10 =====
-[vec:2] [vec:3] [vec:4] [vec:5] [vec:6] [vec:7]
-===== =====
-[Con][../cpp_tools/main_Tvlog.cpp:<123>]
-===== vec:10 =====
-[vec:0] [vec:1] [vec:2]
-[vec:3] [vec:4] [vec:5]
-[vec:6] [vec:7] [vec:8]
-[vec:9]
-===== =====
 [Err][../cpp_tools/main_Tvlog.cpp:<125>] <<<< == 容器打印--模板 ==
 | [../cpp_tools/main_Tvlog.cpp:<132>]
 | size: 25
