@@ -17,16 +17,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     ../qbutt_col.cpp \
-    main.cpp \
-    widget.cpp
+#    main.cpp \
+    ../qmove_pos.cpp \
+    main_move.cpp \
+#    widget.cpp
 
 HEADERS += \
     ../qbutt_col.h \
+    ../qmove_pos.h \
     ../qt_butt_tree.h \
-    widget.h
+#    widget.h
 
-FORMS += \
-    widget.ui
+#FORMS += \
+#    widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
