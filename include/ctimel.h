@@ -99,7 +99,7 @@ public:
         return ret;
     }
 
-    time_t time_now(){ time_t t; return time(&t); }; //当前时间
+    time_t time_now(){ time_t t; return time(&t); } //当前时间
 };
 //===== ctimel =====
 
