@@ -1,0 +1,37 @@
+QCheckBox {
+    min-width: 30px;
+    min-height: 30px;
+    margin: 10px;
+    color: blueviolet;
+    background-color: aqua;
+}
+
+QCheckBox::indicator {
+    min-width: 20px;
+    min-height: 20px;
+}
+
+QCheckBox::indicator:unchecked {
+    background-color: blue;
+    image: url(":/images/checkbox_unchecked.png");
+}
+
+QCheckBox::indicator:unchecked:hover {
+    background-color: red;
+}
+
+QCheckBox::indicator:unchecked:pressed {
+    background-color: blueviolet;
+}
+
+QCheckBox::indicator:checked {
+    image: url(":/images/checkbox_checked.png");
+}
+
+QCheckBox::indicator:checked:hover {
+    background-color: green;
+}
+
+QCheckBox::indicator:checked:pressed {
+    background-color: grey;
+}

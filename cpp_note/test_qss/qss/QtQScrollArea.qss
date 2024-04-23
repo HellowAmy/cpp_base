@@ -1,0 +1,42 @@
+QScrollArea {
+    border: 10px solid #d16d6d;
+    background-color: #3ad185;
+    padding: 10px;
+}
+
+
+QScrollBar::handle {
+    background-color: #4ed3d8;
+    margin: 0px;
+}
+
+QScrollBar:vertical {
+    background-color: #b6dd76;
+    width: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    border-radius: 5px;
+    background-color: #cf2e9a;
+}
+
+
+QScrollBar:horizontal {
+    background-color: #c55df5;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #666666;
+}
+
+QScrollBar::handle:horizontal:pressed {
+    background-color: #cf2e9a;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}

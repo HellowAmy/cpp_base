@@ -1,0 +1,11 @@
+QLineEdit {
+    background-color: white;
+    border: 5px solid black;
+    border-radius: 20px;
+    min-height: 30px;
+    padding: 10px;
+}
+
+QLineEdit[read_only="true"] {
+    background-color: rgb(90, 90, 90);
+}

@@ -1,0 +1,56 @@
+QPushButton {
+    background-color: yellow;
+    color: brown;
+    border: 5px solid green;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    min-height: 50px;
+}
+
+QPushButton:hover {
+    border-color: #33A1FF;
+}
+
+QPushButton:pressed {
+    border-color: #FF3333;
+    background-color: aqua;
+}
+
+QPushButton#PushButtonTest {
+    background-color: rgb(226, 69, 166);
+    image: url(":/images/pushbutton.png");
+}
+
+QPushButton#PushButtonTest:hover {
+    background-image: url(":/images/pushbutton_hover.png");
+}
+
+QPushButton#PushButtonTest:pressed {
+    background-image: url(":/images/pushbutton_pressed.png");
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+QPushButton::menu-indicator {
+    subcontrol-position: right center;
+    subcontrol-origin: padding;
+    left: -2px;
+}
+
+QToolTip {
+
+    border: 5px solid #0f7dfc;
+    padding: 5px;
+    border-radius: 20px;
+    background-color: transparent;
+    color: brown;
+    font-size: 30px;
+}
+
+QPushButton#PushButtonTest QToolTip {
+    min-width: 300px;
+    min-height: 100px;
+    background-color: rgb(0, 255, 64);
+    image: url(":/images/pushbutton_pressed.png");
+}

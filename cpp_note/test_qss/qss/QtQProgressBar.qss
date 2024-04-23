@@ -1,0 +1,34 @@
+QProgressBar {
+    background-color: rgb(223, 223, 121);
+    color: rgb(89, 64, 180);
+    border: 5px solid rgb(198, 79, 214);
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    min-height: 30px;
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+QProgressBar:horizontal {
+    text-align: right;
+}
+
+QProgressBar:vertical {
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #05B8CC;
+}
+
+QProgressBar#ProgressBarTest {
+    background-color: rgb(87, 187, 157);
+}
+
+QProgressBar#ProgressBarTest::chunk {
+    background-color: #bb2e51;
+    width: 20px;
+    margin: 2px;
+}

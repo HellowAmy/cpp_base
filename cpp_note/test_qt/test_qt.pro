@@ -17,10 +17,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     ../qbutt_col.cpp \
-#    main.cpp \
+    main.cpp \
     ../qmove_pos.cpp \
     main_move.cpp \
-#    widget.cpp
+    widget.cpp
 
 HEADERS += \
     ../qbutt_col.h \

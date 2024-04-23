@@ -1,0 +1,63 @@
+QTableWidget {
+    background-color: rgb(95, 201, 233);
+    border: 5px solid rgb(238, 89, 113);
+    border-radius: 20px;
+    min-height: 200px;
+    padding: 10px;
+}
+
+QTableWidget QTableCornerButton::section {
+    background: rgb(151, 226, 116);
+    border: 5px solid red;
+}
+
+QTableWidget::item {
+    border: 2px solid rgb(31, 247, 12);
+    border-radius: 20px;
+    background-color: rgb(175, 201, 29);
+    color: #36658b;
+    font-size: 20px;
+}
+
+QTableWidget::item:selected {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #ee963d, stop: 1 #2747d3);
+}
+
+QTableWidget::item:hover {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1, stop: 0 #00ffea, stop: 1 #0b35f1);
+}
+
+QTableWidget::item:focus {
+    background-color: #ab91d6;
+    border: 5px solid rgb(164, 231, 98);
+    outline: #e40909;
+}
+
+QHeaderView::section {
+    padding: 5px;
+    border-bottom: 3px solid #f09494;
+    font-size: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #f09494;
+    background-color: aquamarine;
+}
+
+QHeaderView::section:hover {
+    border: 5px solid rgb(14, 171, 177);
+    padding: 5px;
+    border-bottom: 3px solid #e40909;
+    font-size: 25px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #4c1a9c;
+    background-color: rgb(194, 211, 47);
+}
+
+QHeaderView::section:vertical:hover {
+    border: 5px solid rgb(14, 171, 177);
+    padding: 5px;
+    border-bottom: 3px solid #e40909;
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #4c1a9c;
+    background-color: rgb(194, 211, 47);
+}

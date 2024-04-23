@@ -1,0 +1,40 @@
+QMenu {
+    background-color: #ABABAB;
+    border: 3px solid black;
+    margin: 2px;
+}
+
+QMenu::item {
+    background-color: darkgreen;
+    padding: 2px 25px 2px 20px;
+    border: 3px solid transparent; 
+
+}
+
+QMenu::item:selected {
+    background-color: #654321;
+    border-color: darkblue;
+    background: darkorange
+}
+
+QMenu::icon:checked {
+    background: gray;
+    border: 1px inset gray;
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    bottom: 1px;
+    left: 1px;
+}
+
+QMenu::separator {
+    height: 2px;
+    background: rgb(12, 82, 105);
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+QMenu::indicator {
+    width: 26px;
+    height: 13px;
+}

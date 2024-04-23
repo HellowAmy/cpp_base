@@ -1,0 +1,32 @@
+QRadioButton {
+    min-width: 30px;
+    min-height: 30px;
+    margin: 10px;
+    border: 5px solid rgb(73, 73, 73);
+    color: rgb(101, 235, 145);
+    border-radius: 20px;
+}
+
+QRadioButton::indicator {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+QRadioButton::indicator:unchecked {
+    margin-left: 20px;
+    margin-right: 20px;
+    background-color: aqua;
+}
+
+QRadioButton::indicator:checked {
+    image: url(:/images/radiobutton_checked.png);
+}
+
+QRadioButton::indicator:checked:hover  {
+    background-color: brown;
+}
+
+QRadioButton::indicator:checked:pressed {
+    image: url(:/images/radiobutton_checked.png);
+    background-color: transparent;
+}

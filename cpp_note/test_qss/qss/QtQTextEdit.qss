@@ -1,0 +1,11 @@
+QTextEdit {
+    background-color: yellow;
+    color: brown;
+    border: 5px solid green;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    min-height: 100px;
+    padding: 30px;
+}
+

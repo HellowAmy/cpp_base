@@ -1,0 +1,57 @@
+QListWidget {
+    background-color: rgb(201, 236, 135);
+    border: 5px solid rgb(212, 41, 127);
+    border-radius: 20px;
+    min-height: 200px;
+    padding: 10px;
+}
+
+QListWidget::item {
+    padding: 10px;
+    border: 4px solid #6d3997; 
+    border-radius: 20px;
+    margin: 5,5,5,5;
+}
+
+QListWidget::item:selected {
+    background-color: rgb(118, 218, 198);
+    color: rgb(228, 126, 189); 
+}
+
+QListWidget::item:hover {
+    background-color: #69bd25;
+    color: rgb(240, 6, 6);
+}
+
+QListWidget::item:alternate {
+    background: #EEEEEE;
+}
+
+QListWidget::item:selected {
+    border: 5px solid #25c025;
+    color: #127dc4;
+}
+
+QListWidget::item:selected:focus {
+    outline: 2px dashed #FFA500;
+    outline-offset: -2px;
+    border: 5px solid #37b6f1;
+}
+
+QListWidget::item:focus {
+    background-color: #ab91d6;
+    border: 5px solid rgb(164, 231, 98);
+    outline: #e40909;
+}
+
+QListWidget::item:selected:!active {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0.5, y2: 1, stop: 0 #ABAFE5, stop: 1 #d40b1c);
+}
+
+QListWidget::item:selected:active {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.5 #6a6ea9, stop: 1 #6bd82c);
+}
+
+QListWidget::item:hover {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0.5, y2: 1, stop: 0 #FAFBFE, stop: 1 #a32198);
+}
