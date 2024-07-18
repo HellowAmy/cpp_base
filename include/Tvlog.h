@@ -7,6 +7,11 @@
 #include <iostream>
 #include <fstream>
 #include <mutex>
+#include <queue>
+#include <thread>
+#include <memory>
+#include <condition_variable>
+#include <strstream>
 
 //== 单例模板 ==
 template<class T>
@@ -115,7 +120,7 @@ public:
     inline Tflog& operator<<(const T &log)
     { if(_ok &&_fs.is_open()) _fs<<log; return *this; };
 
-private:
+protected:
     bool _ok = false;       //判断等级是否符合
     int _limit_max = 0;     //日志文件限制数量
     int _limit_now = 1;     //当前写入日志
@@ -163,9 +168,91 @@ private:
 };
 //== 文件日志模板 ==
 
+
+
+
+
+template<typename T>
+inline std::string Tto_string(const T &ctx)
+{
+    return std::to_string(ctx);
+}
+
+inline std::string Tto_string(const char *ctx)
+{
+    return ctx;
+}
+
+inline std::string Tto_string(const std::string &ctx)
+{
+    return ctx;
+}
+
+//== 日志模板 ==
+
+template<class Tlevel>
+class Talog : public Tflog<Tlevel>
+{
+
+public:
+    Talog()
+    {   
+        std::thread (&Talog::work_write,this).detach();
+    }
+    ~Talog()
+    {
+        _run = false;
+    }
+
+    void work_write()
+    {
+        while(_run)
+        {
+            {
+                std::unique_lock<std::mutex> lock(_mut);
+                while (_que_log.empty() == false)
+                {
+                    std::string ctx = std::move(_que_log.front()); 
+                    _que_log.pop();
+                    write_log(ctx);
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }
+
+    inline void write_log(const std::string &txt)
+    { this->_fs<<txt<<std::endl; }
+
+    inline void push_queue(const std::string &txt)
+    { std::unique_lock<std::mutex> lock(_mut); _que_log.push(txt); }
+
+    inline void update_buf()
+    { push_queue(_buf_log); _buf_log = ""; }
+
+    inline Talog& operator<<(Tlevel el)
+    { if(el <= this->_level) { this->_ok = true; } else { this->_ok = false; } return *this; };
+
+    inline Talog& operator<<(std::ostream& (*end)(std::ostream&))
+    { if( this->_ok){ update_buf(); this->update_file(); } return *this; };
+
+    template<class T>
+    inline Talog& operator<<(const T &log)
+    { if(this->_ok) { _buf_log += Tto_string(log); } return *this; };
+
+protected:
+    bool _run = true;
+    std::string _buf_log;
+    std::mutex _mut;
+    std::queue<std::string> _que_log;
+};
+
+
+
 typedef level4::level vlevel4;
 typedef Tsingle_d<Tflog<vlevel4>> Tflogs;
 typedef Tsingle_d<Tvlog<vlevel4>> Tvlogs;
+typedef Tsingle_d<Talog<vlevel4>> Talogs;
 
 //颜色打印--注释掉则无颜色
 //#define VLOG_COLOR
@@ -195,6 +282,12 @@ typedef Tsingle_d<Tvlog<vlevel4>> Tvlogs;
 #define FMAKE_LOG(txt,type,...)                                             \
     *Tflogs::get()<<type                                                    \
     <<"["<<Tflogs::get()->date_time()<<"] "                                 \
+    <<txt " <<<< "<<__VA_ARGS__                                             \
+    <<" >>>> ["<<__FILE__<<":<"<<__LINE__<<">]"<<std::endl                  \
+
+#define AMAKE_LOG(txt,type,...)                                             \
+    *Talogs::get()<<type                                                    \
+    <<"["<<Talogs::get()->date_time()<<"] "                                 \
     <<txt " <<<< "<<__VA_ARGS__                                             \
     <<" ["<<__FILE__<<":<"<<__LINE__<<">]"<<std::endl                       \
 //== 打印工厂宏 ==
@@ -229,6 +322,15 @@ typedef Tsingle_d<Tvlog<vlevel4>> Tvlogs;
 #define flogw(...) FMAKE_LOG("[War]",vlevel4::e_warning,__VA_ARGS__)
 #define floge(...) FMAKE_LOG("[Err]",vlevel4::e_error,__VA_ARGS__)
 //== 文件日志宏 ==
+
+
+//== 异步日志宏 ==
+#define alogi(...) AMAKE_LOG("[Inf]",vlevel4::e_info,__VA_ARGS__)
+#define alogd(...) AMAKE_LOG("[Deb]",vlevel4::e_debug,__VA_ARGS__)
+#define alogw(...) AMAKE_LOG("[War]",vlevel4::e_warning,__VA_ARGS__)
+#define aloge(...) AMAKE_LOG("[Err]",vlevel4::e_error,__VA_ARGS__)
+//== 异步日志宏 ==
+
 
 
 //===== 容器打印 =====

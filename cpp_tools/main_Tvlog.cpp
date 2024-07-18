@@ -34,11 +34,14 @@
 #define VLOG_COLOR  //需要在Tvlog.h文件之前使用
 //#define VLOG_CLOSE  //需要在Tvlog.h文件之前使用
 #include "../include/Tvlog.h"
+#include "../include/format.h"
 #include <vector>
 #include <list>
 
 #include <chrono>
 #include <iostream>
+#include <string>
+#include <cstring>
 using std::string;
 using std::vector;
 using std::list;
@@ -211,7 +214,7 @@ void test_2()
     int ret = 10*60;
     flogd($(str) $(ret) $(count));
 
-    int ifor = 3;
+    int ifor = 3000000;
 
 #if 1
     {
@@ -228,16 +231,127 @@ void test_2()
             flogw($(i) $(value) $(s));
         }
         string s2 = c.to_str();
+        std::cout<<"=======: "<<s1<<std::endl;
+        std::cout<<"=======: "<<s2<<std::endl;
     }
 #endif
+}
+
+void test_3()
+{
+    Talogs::get()->init("Talog.log",false);     //设置日志文件和追加模式
+    Talogs::get()->set_level(vlevel4::e_debug); //设置最低显示日志级别
+    Talogs::get()->set_limit(5);                //设置日志数量（启动循环覆盖）--不设置则默认无限制
+    Talogs::get()->set_length(1024*1024*10);    //设置最大日志长度（10M）--不设置默认64M
+
+    //普通打印
+    aloge("== 普通打印 ==");
+    alogi("e_info level");
+    alogd("this template log");
+    alogd("10+20 ret: " << 10+20);
+    alogw("PI: "<<3.14);
+    aloge("2^4 calculate: "<<2*2<<" * "<<2*2<<" = "<<4*4);
+    aloge("2^4 calculate:" $(2*2) $(2*2) "=" $(4*4));
+
+    //快速打印结果
+    aloge("== 快速打印 ==");
+    int count = 0;
+    for(int i=0;i<=100;i++) count += i;
+    string str = "hello world";
+    int ret = 10*60;
+    alogd($(str) $(ret) $(count));
+
+    int ifor = 3000000;
+
+#if 1
+    {
+        ctimel c;
+        for(int i=0;i<ifor;i++)
+        {
+            alogw($(i) "hellow world");
+        }
+        string s1 = c.to_str();
+        int value=100;
+        string s = "hellow world";
+        for(int i=0;i<ifor;i++)
+        {
+            alogw($(i) $(value) $(s));
+        }
+        string s2 = c.to_str();
+        std::cout<<"=======: "<<s1<<std::endl;
+        std::cout<<"=======: "<<s2<<std::endl;
+    }
+#endif
+}
+
+
+class trs
+{
+public:
+    template<class T>
+    inline trs& operator<<(const T &txt)
+    { _buf += Tto_string(txt); return *this; };
+
+    inline trs& operator<<(std::ostream& (*end)(std::ostream&))
+    { std::cout<<_buf<<std::endl; _buf = ""; return *this; };
+
+    inline void show_buf(const std::string &buf)
+    {
+        std::cout<<buf<<std::endl;
+    }
+
+    std::string _buf;
+};
+
+void test_4()
+{
+    int count = 10000000;
+
+    // {
+    //     ctimel c;
+    //     trs ts;
+    //     for(int i=0;i<count;i++)
+    //     {
+    //         ts<<"t1:"<<i+1<<"t2:"<<i+2<<"t3:"<<i+3<<"t4:"<<i+4<<"t5:"<<i+5<<"t6:"<<i+6<<std::endl;
+    //     }
+    //     std::cout<<"count1: "<<c.to_str()<<std::endl; 
+    // }
+
+    {
+        ctimel c;
+        trs ts;
+        char buf[64];
+        for(int i=0;i<count;i++)
+        {   
+            memset(buf,0,sizeof(buf));
+            sprintf(buf,"t1:%dt2:%dt3:%dt4:%dt5:%dt6:%d",i+1,i+2,i+3,i+4,i+5,i+6);
+            std::string s(buf);
+        }
+        std::cout<<"count1: "<<c.to_str()<<std::endl; 
+    }
+    {
+        ctimel c;
+        trs ts;
+        for(int i=0;i<count;i++)
+        {   
+            std::string s = sformat("t1:{0}t2:{1}t3:{2}t4:{3}t5:{4}t6:{5}")(i+1,i+2,i+3,i+4,i+5,i+6);
+            // ts.show_buf(sformat("t1:{0}t2:{1}t3:{2}t4:{3}t5:{4}t6:{5}")(i+1,i+2,i+3,i+4,i+5,i+6));
+        }
+        std::cout<<"count2: "<<c.to_str()<<std::endl; 
+    }
+    
+
+
 }
 
 int main()
 {
     printf("== begin ==\n");
 
-    test_1();
-    test_2();
+    // test_1();
+    // test_2();
+    // test_3();
+    test_4();
 
     printf("== end ==\n");
     return 0;
