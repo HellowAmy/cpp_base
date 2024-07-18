@@ -150,14 +150,91 @@ void test_1()
 
 }
 
+template<class... T>
+std::string formatf(const char *fmt, const T&...t)
+{
+    const auto len = snprintf(nullptr, 0, fmt, t...);
+    std::string r;
+    r.resize(static_cast<size_t>(len) + 1);
+    snprintf(&r.front(), len + 1, fmt, t...);  // Bad boy
+    r.resize(static_cast<size_t>(len));
+ 
+    return r;
+}
+
 void test_2()
 {
     int a = 25;
     double b = 3.14;
     string c = "hellow world !";
 
+    cout<<endl<<"== 常用格式化 == "<<endl;
+    {
+        string str = fformat("[{} {} {}]")(100,3.1415926,"how are you");
+        cout<<str<<endl;
+    }
+    {
+        string str = fformat("[{} {} {}]")(a,b,c);
+        cout<<str<<endl;
+    }
+    {
+        string str = fformat("{}{}{}")(a,b,c);
+        cout<<str<<endl;
+    }
+    {
+        string str = fformat("{}--{}--{}")(a,b,c);
+        cout<<str<<endl;
+    }
+}
 
-
+void test_3()
+{
+    // int count = 50000000;
+    int count = 10000000;
+    // int count = 1000000;
+    // int count = 1;
+    {
+        ctimel c;
+        for(int i=0;i<count;i++)
+        {   
+            char buf[64];
+            sprintf(buf,"<<t1:%dt2:%st3:%ft4:%dt5:%st6:%d>>",i+1,"==",i+3.3,i+4,"==",i+6);
+            std::string s(buf);
+            // std::cout<<s<<std::endl;
+        }
+        c.add_point();
+        c.show_vec();
+    }
+    {
+        ctimel c;
+        for(int i=0;i<count;i++)
+        {   
+            std::string s = formatf("<<t1:%dt2:%st3:%ft4:%dt5:%st6:%d>>",i+1,"==",i+3.3,i+4,"==",i+6);
+            // std::cout<<s<<std::endl;
+        }
+        c.add_point();
+        c.show_vec();
+    }
+    {
+        ctimel c;
+        for(int i=0;i<count;i++)
+        {   
+            std::string s = fformat("<<t1:{}t2:{}t3:{}t4:{}t5:{}t6:{}>>")(i+1,"==",i+3.3,i+4,"==",i+6);
+            // std::cout<<s<<std::endl;
+        }
+        c.add_point();
+        c.show_vec();
+    }
+    {
+        ctimel c;
+        for(int i=0;i<count;i++)
+        {   
+            std::string s = sformat("<<t1:{0}t2:{1}t3:{2}t4:{3}t5:{4}t6:{5}>>")(i+1,"==",i+3.3,i+4,"==",i+6);
+            // std::cout<<s<<std::endl;
+        }
+        c.add_point();
+        c.show_vec();
+    }
 }
 
 
@@ -165,8 +242,9 @@ int main()
 {
     cout<<"== begin =="<<endl;
 
-        test_1();
+        // test_1();
     //    test_2();
+       test_3();
 
     cout<<"== end =="<<endl;
     return 0;

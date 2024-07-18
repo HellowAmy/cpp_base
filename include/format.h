@@ -141,4 +141,81 @@ struct sformat
     }
 };
 
+
+struct fformat
+{
+    static const char _flg_begin = '{';
+    static const char _flg_end = '}';
+
+    int _index = 0;
+    std::string _str_org;
+    std::string _str_ret;
+
+    fformat(const std::string &str) : _str_org(str){}
+
+    //== 字符串转换函数 ==
+    template <class T>
+    static inline std::string to_string(T && val)
+    { return std::to_string(std::forward<T>(val)); }
+
+    static inline std::string to_string(const char *val)
+    { return val; }
+
+    static inline std::string to_string(const std::string &val)
+    { return val; }
+    //== 字符串转换函数 ==
+
+
+
+    //== 处理格式化字符 ==
+    template<class ...Tarr>
+    inline std::string sformat_t()
+    {
+        for(int i=_index;i<_str_org.size();i++)
+        {
+            _str_ret.push_back(_str_org[i]);
+        }
+        return _str_ret;
+    }
+
+    template<class T,class ...Tarr>
+    inline std::string sformat_t(T && val,const Tarr &...arg)
+    {
+        if( process_str(to_string(std::forward<T>(val))) )
+        { return sformat_t(arg...); }
+        return sformat_t();
+    }
+
+    inline bool process_str(const std::string &val)
+    {
+        bool is_find = false;
+        for(int i=_index;i<_str_org.size();i++)
+        {
+            if(_str_org[i] == _flg_begin)
+            {
+                is_find = true;
+            }
+            else if(is_find && _str_org[i] == _flg_end)
+            {
+                _index = i+1;
+                _str_ret += val;
+                return true;
+            }
+
+            if(is_find == false) 
+            {   
+                _str_ret.push_back(_str_org[i]);
+            }
+        }
+
+        return false;
+    }
+
+    template<class ...Tarr>
+    inline std::string operator()(const Tarr &...arg)
+    { return sformat_t(arg...); }
+    //== 处理格式化字符 ==
+
+};
+
 #endif // FORMAT_H
