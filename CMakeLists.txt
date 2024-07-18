@@ -66,3 +66,6 @@ add_executable(main_Tvlog cpp_tools/main_Tvlog.cpp)
 # main_format
 add_executable(main_format cpp_tools/main_format.cpp)
 
+# main_Fbyte
+add_executable(main_Fbyte cpp_tools/main_Fbyte.cpp)
+

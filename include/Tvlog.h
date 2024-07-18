@@ -270,7 +270,7 @@ typedef Tsingle_d<Talog<vlevel4>> Talogs;
 
 //== 打印工厂宏 ==
 #define VMAKE_LOG(txt,type,...)                                             \
-    *Tsvlog::get()<<type                                                    \
+    *Tvlogs::get()<<type                                                    \
     <<txt "["<<__FILE__<<":<"<<__LINE__<<">] <<<< "                         \
     <<__VA_ARGS__<<std::endl                                                \
 

@@ -95,6 +95,28 @@
             ],
             "preLaunchTask": "CMake Build",
             "visualizerFile": "/home/cong/.config/Code/User/workspaceStorage/8d94fbca36a337f44bbf115152f1046b/tonka3000.qtvsctools/qt.natvis.xml"
+        },
+        {
+            "name": "Run [main_Fbyte]",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/main_Fbyte",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "CMake Build",
+            "visualizerFile": "/home/cong/.config/Code/User/workspaceStorage/8d94fbca36a337f44bbf115152f1046b/tonka3000.qtvsctools/qt.natvis.xml"
         }
     ]
 }
